@@ -5,28 +5,29 @@
     android:paddingLeft   = "16dp"
     android:paddingRight  = "16dp"
     >
-    <EditText android:id="@+id/edit_message"
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:hint="@string/edit_message"
-        />
-    <Button
-            android:layout_width            ="wrap_content"
-            android:layout_height           ="wrap_content"
-            android:layout_alignParentLeft  ="true"
-            android:text                    ="@string/button_send"
-            android:onClick                 ="sendMessage"
-        />
+        <EditText android:id="@+id/edit_message"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft  = "true"
+                android:hint="@string/edit_message"
+            />
+        <Button
+                android:layout_width            = "wrap_content"
+                android:layout_height           = "wrap_content"
+                android:text                    = "@string/button_send"
+                android:onClick                 = "sendMessage"
+                android:layout_alignParentRight  = "true"
+                android:layout_toRightOf="@id/edit_message"
+            />
     <Switch
-            android:id="@+id/toggle_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textOn="Lunch!"
-            android:textOff="Working..."
-            android:layout_below="@id/edit_message"
-            android:layout_alignParentLeft="true"
-            android:onClick="onStatusChanged"
+            android:id            = "@+id/toggle_button"
+            android:layout_width  = "wrap_content"
+            android:layout_height = "wrap_content"
+            android:textOn        = "Lunch!"
+            android:textOff       = "Working..."
+            android:layout_below  = "@id/edit_message"
+            android:layout_alignParentLeft  = "true"
+            android:onClick                 = "onStatusChanged"
         />
 </RelativeLayout>
 
