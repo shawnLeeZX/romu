@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width  = "fill_parent"
+    android:layout_height = "fill_parent"
+    android:paddingLeft   = "16dp"
+    android:paddingRight  = "16dp"
+    >
+    <EditText android:id="@+id/edit_message"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="@string/edit_message"
+        />
+    <Button
+            android:layout_width            ="wrap_content"
+            android:layout_height           ="wrap_content"
+            android:layout_alignParentLeft  ="true"
+            android:text                    ="@string/button_send"
+            android:onClick                 ="sendMessage"
+        />
+    <Switch
+            android:id="@+id/toggle_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textOn="Lunch!"
+            android:textOff="Working..."
+            android:layout_below="@id/edit_message"
+            android:layout_alignParentLeft="true"
+            android:onClick="onStatusChanged"
+        />
+</RelativeLayout>
+
