@@ -31,7 +31,8 @@ public class DisplayMessageActivity extends Activity
 
         // Get the message from the intent.
         Intent intent = getIntent();
-        String messsage = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
+        // String messsage = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
+        String messsage = "You have successfully set your hint!!!";
 
         // Get the text view.
         TextView textView = new TextView(this);
@@ -46,7 +47,7 @@ public class DisplayMessageActivity extends Activity
         public boolean onOptionsItemSelected(MenuItem item) {
             switch (item.getItemId()) {
             case android.R.id.home:
-                NavUtils.navigateUpFromSameTask(this);
+                // NavUtils.navigateUpFromSameTask(this);
                 return true;
             }
             return super.onOptionsItemSelected(item);
