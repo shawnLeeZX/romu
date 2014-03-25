@@ -1,7 +1,11 @@
 package com.venn.app;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.FragmentManager;
 import android.bluetooth.BluetoothAdapter;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,6 +22,7 @@ public class MainActivity extends Activity
     private static final int ENABLE_BLUETOOTH = 1;
 
     private BluetoothAdapter bluetooth = null;
+    private FragmentManager fragmentManager = null;
 
     /** Called when the activity is first created. */
     @Override
@@ -26,6 +31,7 @@ public class MainActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        fragmentManager = getFragmentManager();
         // Since bluetooth plays a central role of this app, it will ask the
         // user to enable bluetooth at startup.
         // TODO: change the switch asychronously.
@@ -102,10 +108,33 @@ public class MainActivity extends Activity
 
     private void showBluetoothConfirmDialog()
     {
-        ConfirmationDialogFragment fragment =
-            ConfirmationDialogFragment.newInstance(R.string.confirmation);
+        // Create an dialog and pass it to ConfirmationDialogFragment to render.
+        Dialog dialog = new AlertDialog.Builder(this)
+            .setTitle(R.string.confirmation)
+            .setPositiveButton(R.string.confirm_dialog_ok,
+                    new DialogInterface.OnClickListener()
+                    {
+                        public void onClick(DialogInterface dialog, int whichButton)
+                        {
+                            enableBluetooth();
+                        }
+                    }
+            )
+            .setNegativeButton(R.string.confirm_dialog_cancel,
+                    new DialogInterface.OnClickListener()
+                    {
+                        public void onClick(DialogInterface dialog, int whichButton)
+                        {
+                            finish();
+                        }
+                    }
+            )
+            .create();
 
-        fragment.show(getFragmentManager(), "bluetooth_comfirmation");
+        ConfirmationDialogFragment fragment = new ConfirmationDialogFragment();
+        fragment.setDialog(dialog);
+
+        fragment.show(fragmentManager, "bluetooth_comfirmation");
     }
 
 }

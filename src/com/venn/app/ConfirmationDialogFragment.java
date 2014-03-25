@@ -12,42 +12,29 @@ import android.os.Bundle;
  */
 public class ConfirmationDialogFragment extends DialogFragment
 {
+    private Dialog dialog = null;
 
-    public static ConfirmationDialogFragment newInstance(int title)
-    {
-        ConfirmationDialogFragment confirmDialogFragment = new ConfirmationDialogFragment();
+    // The following code is left as reference to show how to use bundle to pass
+    // parameters. They are not useful.
+    //
+    // public static ConfirmationDialogFragment newInstance(int title)
+    // {
+        // ConfirmationDialogFragment confirmDialogFragment = new ConfirmationDialogFragment();
 
-        Bundle args = new Bundle();
-        args.putInt("title", title);
-        confirmDialogFragment.setArguments(args);
-        return confirmDialogFragment;
-    }
+        // Bundle args = new Bundle();
+        // args.putInt("title", title);
+        // confirmDialogFragment.setArguments(args);
+        // return confirmDialogFragment;
+    // }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState)
     {
-        int title = getArguments().getInt("title");
+        return dialog;
+    }
 
-        return new AlertDialog.Builder(getActivity())
-            .setTitle(title)
-            .setPositiveButton(R.string.confirm_dialog_ok,
-                    new DialogInterface.OnClickListener()
-                    {
-                        public void onClick(DialogInterface dialog, int whichButton)
-                        {
-                            ((MainActivity)getActivity()).enableBluetooth();
-                        }
-                    }
-            )
-            .setNegativeButton(R.string.confirm_dialog_cancel,
-                    new DialogInterface.OnClickListener()
-                    {
-                        public void onClick(DialogInterface dialog, int whichButton)
-                        {
-                            ((MainActivity)getActivity()).finish();
-                        }
-                    }
-            )
-            .create();
+    public void setDialog(Dialog dialog)
+    {
+        this.dialog = dialog;
     }
 }
