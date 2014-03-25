@@ -31,13 +31,14 @@ public class DisplayMessageActivity extends Activity
 
         // Get the message from the intent.
         Intent intent = getIntent();
-        // String messsage = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
-        String messsage = "You have successfully set your hint!!!";
+        String message = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
+        // TODO: remove this when finishing setting status hint part.
+        // String messsage = "You have successfully set your hint!!!";
 
         // Get the text view.
         TextView textView = new TextView(this);
         textView.setTextSize(40);
-        textView.setText(messsage);
+        textView.setText(message);
 
         // Set the text view as the activity layout.
         setContentView(textView);

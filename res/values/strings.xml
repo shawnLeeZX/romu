@@ -7,4 +7,10 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_display_message">My Message</string>
+
+    <!-- For Bluetooth Confirmation Dialog. -->
+    <string name="confirmation">Bluetooth Needed</string>
+    <!-- For General Confirmation Dialog. -->
+    <string name="confirm_dialog_ok">OK</string>
+    <string name="confirm_dialog_cancel">Cancel</string>
 </resources>
