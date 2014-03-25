@@ -49,9 +49,5 @@ public class ConfirmationDialogFragment extends DialogFragment
                     }
             )
             .create();
-
-
-
     }
-
 }

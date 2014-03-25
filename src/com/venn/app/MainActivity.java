@@ -16,7 +16,6 @@ public class MainActivity extends Activity
     public final static String EXTRA_MESSAGE = "com.venn.app.MESSAGE";
 
     private static final int ENABLE_BLUETOOTH = 1;
-    private static final int ASK_FOR_ENABLING_BLUETOOTH = 2;
 
     private BluetoothAdapter bluetooth = null;
 
@@ -95,9 +94,10 @@ public class MainActivity extends Activity
 
     public void onStatusChanged(View view)
     {
-                        // Search and connect to the wearable.
-                        //
-                        // Send status change info.
+        // TODO: 
+        // Search and connect to the wearable.
+        //
+        // Send status change info.
     }
 
     private void showBluetoothConfirmDialog()

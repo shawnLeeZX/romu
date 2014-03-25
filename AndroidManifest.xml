@@ -29,13 +29,5 @@
                 android:value   = "com.venn.app.MainActivity" />
         </activity>
 
-        <activity
-            android:name    = "com.venn.app.ConfirmationActivity"
-            android:label   = "@string/confirmation"
-            android:parentActivityName = "com.venn.app.MainActivity" >
-            <meta-data
-                android:name    = "android.support.PARENT_ACTIVITY"
-                android:value   = "com.venn.app.MainActivity" />
-        </activity>
     </application>
 </manifest>
