@@ -36,5 +36,13 @@
         android:layout_alignParentLeft  = "true"
         android:onClick                 = "onStatusChanged"
         />
+    <Button
+        android:layout_width    = "wrap_content"
+        android:layout_height   = "wrap_content"
+        android:text            = "@string/button_scan"
+        android:layout_below  = "@id/toggle_button"
+        android:layout_alignParentBottom  = "true"
+        android:onClick                   = "scanForWearables"
+        />
 </RelativeLayout>
 

@@ -98,14 +98,6 @@ public class MainActivity extends Activity
         startActivity(intent);
     }
 
-    public void onStatusChanged(View view)
-    {
-        // TODO: 
-        // Search and connect to the wearable.
-        //
-        // Send status change info.
-    }
-
     private void showBluetoothConfirmDialog()
     {
         // Create an dialog and pass it to ConfirmationDialogFragment to render.
@@ -125,7 +117,7 @@ public class MainActivity extends Activity
                     {
                         public void onClick(DialogInterface dialog, int whichButton)
                         {
-                            finish();
+                            // Does nothing but quit the confirmation dialogue.
                         }
                     }
             )
