@@ -1,5 +1,7 @@
 package com.venn.app;
 
+import com.google.android.gms.maps.*;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -17,6 +19,8 @@ import android.widget.EditText;
 
 public class MainActivity extends Activity
 {
+    private static final String LOG_TAG = "Venn";
+
     public final static String EXTRA_MESSAGE = "com.venn.app.MESSAGE";
 
     private static final int ENABLE_BLUETOOTH = 1;
@@ -24,12 +28,15 @@ public class MainActivity extends Activity
     private BluetoothAdapter bluetooth = null;
     private FragmentManager fragmentManager = null;
 
+    private GoogleMap map;
+
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
+
+        setContentView(R.layout.map_main);
 
         fragmentManager = getFragmentManager();
         // Since bluetooth plays a central role of this app, it will ask the
@@ -37,6 +44,56 @@ public class MainActivity extends Activity
         // TODO: change the switch asychronously.
         bluetooth = BluetoothAdapter.getDefaultAdapter();
         enableBluetooth();
+        renderMap();
+    }
+
+    // Do a null check to confirm that we have initiated the map.
+    private void setUpMapIfNeeded()
+    {
+        // Get the map if not.
+        if(map == null)
+        {
+            map = ((MapFragment) fragmentManager.findFragmentById(R.id.map))
+                    .getMap();
+            // If we cannot get the map, prompt user to fix the problem.
+            // Otherwise functions concerning map may not work.
+            if(map == null)
+            {
+                Log.d(LOG_TAG, "Failed to instantiate google map");
+                // TODO: Give prompt to let user fix the problem to let the map
+                // running.
+            }
+            else
+                Log.d(LOG_TAG, "Successfully instantiate google map.");
+        }
+    }
+
+    private void renderMap()
+    {
+        map = ((MapFragment) fragmentManager.findFragmentById(R.id.map)).getMap();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 
     public void enableBluetooth()
@@ -76,16 +133,15 @@ public class MainActivity extends Activity
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle presses on the action bar items
-        switch (item.getItemId()) {
-            case R.id.action_search:
-                // openSearch();
-                return true;
-            case R.id.action_settings:
-                // openSettings();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        int itemId = item.getItemId();
+        if (itemId == R.id.action_search) {
+            // openSearch();
+            return true;
+        } else if (itemId == R.id.action_settings) {
+            // openSettings();
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
         }
     }
 
