@@ -1,3 +1,30 @@
+/**
+ * The workflow of this app works like the following:
+ * Initialization:
+ *  The user is given a list to choose the correponding wearable deivce
+ *  according to mac address. After initialization, the app automatically
+ *  connect to the device chosen at start up.
+ *
+ * Normal workflow(after initialization):
+ * At startup:
+ *  if bluetooth is not enabled, it prompts user to enable bluetooth. If the
+ *  user does not permit the action, permission of bluetooth will be asked each
+ *  time it is needed.
+ *
+ *  Then the main interface is loaded, which is a map that gives the user a
+ *  visual display on map of where she or he is.
+ *
+ *  In this interface, user can decide to start navigation by clicking
+ *  'navigation' button.
+ *
+ * When user decide to do navigation:
+ *  After the 'navigation' is clicked, the user is prompted to input a start
+ *  location and a destination. User confirms the input by clicking the button
+ *  'ok' 
+ *
+ * Upon confirmation:
+ *  TODO: stop here.
+ */
 package com.venn.app;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -12,34 +39,35 @@ import android.app.FragmentManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.Toast;
 
 public class MainActivity extends Activity implements
     GooglePlayServicesClient.ConnectionCallbacks,
     GooglePlayServicesClient.OnConnectionFailedListener
 {
-    private static final String LOG_TAG = "Venn";
-
-    // Message exchange.
-    public final static String EXTRA_MESSAGE = "com.venn.app.MESSAGE";
+    public static final String LOG_TAG = "Venn";
 
     // UI.
     private FragmentManager fragmentManager = null;
 
-    // Functionalities.
-    private static final int ENABLE_BLUETOOTH = 1;
+    // Requestion code for user interaction activities.
+    private static final int ENABLE_BLUETOOTH               = 1;
+    private static final int FETCH_START_AND_DESTINATION    = 2;
 
+    // Necessity class for Google services.
     private BluetoothAdapter bluetooth      = null;
     private GoogleMap map                   = null;
     private LocationClient locationClient   = null;
+
+    // Global naviation info.
+    String startLocation    = null;
+    String destination      = null;
 
     /** Called when the activity is first created. */
     @Override
@@ -47,19 +75,31 @@ public class MainActivity extends Activity implements
     {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.map_main);
+        setContentView(R.layout.main);
 
         fragmentManager = getFragmentManager();
 
         // Since bluetooth plays a central role of this app, it will ask the
         // user to enable bluetooth at startup.
-        // TODO: change the switch asychronously.
+        // TODO: change bluetooth to BT Gatt.
         bluetooth = BluetoothAdapter.getDefaultAdapter();
         enableBluetooth();
 
+        // TODO: error handler and location listener for locationClient undone.
         locationClient = new LocationClient(this, this, this);
 
         renderMap();
+        Log.d(LOG_TAG, "Map render finishes.");
+        Log.d(LOG_TAG, "MainActivity initialized.");
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+
+        // Set up map object if it is destroyed.
+        setUpMapIfNeeded();
     }
 
     // Called when the Activity becomes visible.
@@ -83,6 +123,7 @@ public class MainActivity extends Activity implements
     }
 
     // Do a null check to confirm that we have initiated the map.
+    // During app's lifetime, This prevents map being destroyed after suspended.
     private void setUpMapIfNeeded()
     {
         // Get the map if not.
@@ -96,7 +137,7 @@ public class MainActivity extends Activity implements
             {
                 Log.d(LOG_TAG, "Failed to instantiate google map");
                 // TODO: Give prompt to let user fix the problem to let the map
-                // running.
+                // running. For instance, enable network.
             }
             else
                 Log.d(LOG_TAG, "Successfully instantiate google map.");
@@ -105,13 +146,14 @@ public class MainActivity extends Activity implements
 
     private void renderMap()
     {
-        map = ((MapFragment) fragmentManager.findFragmentById(R.id.map)).getMap();
+        setUpMapIfNeeded();
         map.setMyLocationEnabled(true);
     }
 
     public void enableBluetooth()
     {
         // Enable bluetooth if not, otherwise do nothing.
+        Log.d(LOG_TAG, "Trying to enable bluetooth.");
         if(!bluetooth.isEnabled())
         {
             Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -123,12 +165,32 @@ public class MainActivity extends Activity implements
     {
         switch (requestCode)
         {
+            // Prompt user to enable bluetooth.
             case ENABLE_BLUETOOTH:
                 {
+                    Log.d(LOG_TAG, "User cancelled enable bluetooth dialog. Confirming.");
                     if(resultCode != RESULT_OK)
                     {
                         showBluetoothConfirmDialog();
                     }
+                    break;
+                }
+            case FETCH_START_AND_DESTINATION:
+                {
+                    Log.d(LOG_TAG, "Location fetcher returned.");
+                    if(resultCode != RESULT_OK)
+                    {
+                        Log.d(LOG_TAG, "There is something wrong with location fetcher.");
+                        // TODO: code the error handler.
+                        break;
+                    }
+                    Log.d(LOG_TAG, "Location fetcher finished successfully.");
+                    Bundle bundle   = data.getExtras();
+                    startLocation   = bundle.getString(LocationFetcherActivity.START_LOCATION_STRING);
+                    Log.d(LOG_TAG, "Start location fetched: " + startLocation);
+                    destination     = bundle.getString(LocationFetcherActivity.DESTINATION_STRING);
+                    Log.d(LOG_TAG, "Destination fetched: " + destination);
+
                     break;
                 }
             default:
@@ -166,7 +228,8 @@ public class MainActivity extends Activity implements
     @Override
     public void onConnected(Bundle dataBundle) {
         // Display the connection status
-        Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
+        Log.d(LOG_TAG, "Location service connnected.");
+        Toast.makeText(this, "Location Service Connected", Toast.LENGTH_SHORT).show();
     }
 
     /*
@@ -176,7 +239,8 @@ public class MainActivity extends Activity implements
     @Override
     public void onDisconnected() {
         // Display the connection status
-        Toast.makeText(this, "Disconnected. Please re-connect.",
+        Log.d(LOG_TAG, "Location service disconnnected.");
+        Toast.makeText(this, "Location Serice Disconnected. Please re-connect.",
                 Toast.LENGTH_SHORT).show();
     }
 
@@ -217,15 +281,15 @@ public class MainActivity extends Activity implements
         // }
     }
 
-    public void sendMessage(View view)
+    // This is the entry point for haptic navigation. It will start an activity
+    // to let user specify start location and destination.
+    public void onNavigate(View view)
     {
-        Intent intent = new Intent(this, DisplayMessageActivity.class);
-        EditText editText = (EditText) findViewById(R.id.edit_message);
-        String message = editText.getText().toString();
-        intent.putExtra(EXTRA_MESSAGE, message);
-        startActivity(intent);
+            Intent intent = new Intent(this, LocationFetcherActivity.class);
+            startActivityForResult(intent, FETCH_START_AND_DESTINATION);
     }
 
+    // Double confirmation that the user should enable bluetooth using dialog.
     private void showBluetoothConfirmDialog()
     {
         // Create an dialog and pass it to ConfirmationDialogFragment to render.
@@ -246,6 +310,7 @@ public class MainActivity extends Activity implements
                         public void onClick(DialogInterface dialog, int whichButton)
                         {
                             // Does nothing but quit the confirmation dialogue.
+                            Log.d(LOG_TAG, "User decided not to open bluetooth. Just continue.");
                         }
                     }
             )

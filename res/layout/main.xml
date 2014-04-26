@@ -1,48 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android = "http://schemas.android.com/apk/res/android"
-    android:layout_width  = "fill_parent"
-    android:layout_height = "fill_parent"
+<!-- Currently the main interface is a map with a button at the bottom of the
+  interface.-->
+<LinearLayout xmlns:android = "http://schemas.android.com/apk/res/android"
+    android:layout_width  = "match_parent"
+    android:layout_height = "match_parent"
     android:paddingLeft   = "16dp"
     android:paddingRight  = "16dp"
+    android:orientation      = "vertical"
     >
-    <!-- <include layout = "@layout/interactive_message" -->
-            <!-- android:id = "@+id/interactive_message"/> -->
-    <LinearLayout
-        android:id              = "@+id/interactive_message"
-        android:layout_width    = "match_parent"
-        android:layout_height   = "wrap_content"
-        android:orientation     = "horizontal" >
+    <fragment
+        android:id="@+id/map"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight   = "1"
+        android:name="com.google.android.gms.maps.MapFragment"/>
 
-        <EditText android:id = "@+id/edit_message"
-            android:layout_weight   = "1"
-            android:layout_width    = "0dp"
-            android:layout_height   = "wrap_content"
-            android:hint            = "@string/edit_message"
-            />
-        <Button
-            android:layout_width    = "wrap_content"
-            android:layout_height   = "wrap_content"
-            android:text            = "@string/button_send"
-            android:onClick         = "sendMessage"
-            />
-    </LinearLayout>
-    <Switch
-        android:id            = "@+id/toggle_button"
-        android:layout_width  = "wrap_content"
-        android:layout_height = "wrap_content"
-        android:textOn        = "Lunch!"
-        android:textOff       = "Working..."
-        android:layout_below  = "@id/interactive_message"
-        android:layout_alignParentLeft  = "true"
-        android:onClick                 = "onStatusChanged"
-        />
     <Button
         android:layout_width    = "wrap_content"
         android:layout_height   = "wrap_content"
-        android:text            = "@string/button_scan"
-        android:layout_below  = "@id/toggle_button"
-        android:layout_alignParentBottom  = "true"
-        android:onClick                   = "scanForWearables"
+        android:text            = "@string/button_navigate"
+        android:onClick         = "onNavigate"
         />
-</RelativeLayout>
+</LinearLayout>
 

@@ -9,6 +9,11 @@ import android.os.Bundle;
 /**
  * class ConfirmationDialogue
  * @author Shawn
+ *
+ * This class is reponsible for displaying a dialog fragment for any purpose of
+ * user interaction. It is programmed to be rather general, which only plays as
+ * a container of dialog. You need to creat the dialog you want and use
+ * setDialog method to set the dialog to display.
  */
 public class ConfirmationDialogFragment extends DialogFragment
 {

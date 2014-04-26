@@ -1,20 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Venn</string>
-    <string name="edit_message">Enter a message</string>
 
-    <!-- Button Names. -->
-    <string name="button_send">Send</string>
-    <string name="button_scan">Scan</string>
-
+    <!-- For MainActivity-->
+    <!-- ========================================================= -->
     <string name="action_search">Search</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_main">MainActivity</string>
-    <string name="title_activity_display_message">My Message</string>
+    <string name="button_navigate">Navigate</string>
+    <!-- ========================================================= -->
+
 
     <!-- For Bluetooth Confirmation Dialog. -->
     <string name="confirmation">Bluetooth Needed</string>
     <!-- For General Confirmation Dialog. -->
     <string name="confirm_dialog_ok">OK</string>
     <string name="confirm_dialog_cancel">Cancel</string>
+
+    <!-- For LocationFetchActivity. -->
+    <!-- ========================================================= -->
+    <string name="start_location">Start Location</string>
+    <string name="destination">Destination</string>
+    <string name="button_ok">ok</string>
+    <!-- ========================================================= -->
+
 </resources>

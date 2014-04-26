@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Currently location fetch interface consists only of two text field that get
+     start location and destination and a button to confirm user input.-->
+<LinearLayout xmlns:android = "http://schemas.android.com/apk/res/android"
+    android:layout_width    = "match_parent"
+    android:layout_height   = "match_parent"
+    android:paddingLeft   = "16dp"
+    android:paddingRight  = "16dp"
+    android:orientation      = "horizontal"
+    >
+
+    <LinearLayout
+        android:layout_weight   = "1"
+        android:layout_width    = "0dp"
+        android:layout_height   = "wrap_content"
+        android:orientation      = "vertical"
+        >
+        <EditText android:id = "@+id/start_location"
+            android:layout_width    = "match_parent"
+            android:layout_height   = "wrap_content"
+            android:hint            = "@string/start_location"
+            />
+
+        <EditText android:id = "@+id/destination"
+            android:layout_width    = "match_parent"
+            android:layout_height   = "wrap_content"
+            android:hint            = "@string/destination"
+            />
+    </LinearLayout>
+    <Button
+        android:layout_width    = "wrap_content"
+        android:layout_height   = "wrap_content"
+        android:text            = "@string/button_ok"
+        android:onClick         = "onConfirm"
+        />
+</LinearLayout>

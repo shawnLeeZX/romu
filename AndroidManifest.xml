@@ -4,7 +4,7 @@
       android:versionCode   = "1"
       android:versionName   = "1.0">
 
-    <uses-sdk           android:minSdkVersion   = "11" />
+    <uses-sdk           android:minSdkVersion   = "14" />
 
     <!-- For user permissions. -->
     <!-- ============================================================================ -->
@@ -45,8 +45,7 @@
         </activity>
 
         <activity
-            android:name    = "com.venn.app.DisplayMessageActivity"
-            android:label   = "@string/title_activity_display_message"
+            android:name    = "com.venn.app.LocationFetcherActivity"
             android:parentActivityName = "com.venn.app.MainActivity" >
             <meta-data
                 android:name    = "android.support.PARENT_ACTIVITY"
