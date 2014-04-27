@@ -23,7 +23,11 @@
  *  'ok' 
  *
  * Upon confirmation:
- *  TODO: stop here.
+ *  Given two locations, we want to go from the startLocation to destination.
+ *  1. make a http requestion using Google Direction API.
+ *  2. parse the response into meaningful results.
+ *  3. process each segment of the route results one by one.
+ *  TODO: more refinement needed.
  */
 package com.venn.app;
 
@@ -57,8 +61,9 @@ public class MainActivity extends Activity implements
     private FragmentManager fragmentManager = null;
 
     // Requestion code for user interaction activities.
-    private static final int ENABLE_BLUETOOTH               = 1;
-    private static final int FETCH_START_AND_DESTINATION    = 2;
+    private static final int ENABLE_BLUETOOTH_REQUEST               = 1;
+    private static final int FETCH_START_AND_DESTINATION_REQUEST    = 2;
+    private static final int CONNECTION_FAILURE_RESOLUTION_REQUEST  = 3;
 
     // Necessity class for Google services.
     private BluetoothAdapter bluetooth      = null;
@@ -157,7 +162,7 @@ public class MainActivity extends Activity implements
         if(!bluetooth.isEnabled())
         {
             Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(intent, ENABLE_BLUETOOTH);
+            startActivityForResult(intent, ENABLE_BLUETOOTH_REQUEST);
         }
     }
 
@@ -166,7 +171,7 @@ public class MainActivity extends Activity implements
         switch (requestCode)
         {
             // Prompt user to enable bluetooth.
-            case ENABLE_BLUETOOTH:
+            case ENABLE_BLUETOOTH_REQUEST:
                 {
                     Log.d(LOG_TAG, "User cancelled enable bluetooth dialog. Confirming.");
                     if(resultCode != RESULT_OK)
@@ -175,8 +180,9 @@ public class MainActivity extends Activity implements
                     }
                     break;
                 }
-            case FETCH_START_AND_DESTINATION:
+            case FETCH_START_AND_DESTINATION_REQUEST:
                 {
+                    // Fetch the start location and destination from user input.
                     Log.d(LOG_TAG, "Location fetcher returned.");
                     if(resultCode != RESULT_OK)
                     {
@@ -251,8 +257,7 @@ public class MainActivity extends Activity implements
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
-        // TODO: error handle is ignored for the time being.
-        /*
+        /**
          * Google Play services can resolve some errors it detects.
          * If the error has a resolution, try sending an Intent to
          * start a Google Play services activity that can resolve
@@ -264,7 +269,7 @@ public class MainActivity extends Activity implements
                 // connectionResult.startResolutionForResult(
                         // this,
                         // CONNECTION_FAILURE_RESOLUTION_REQUEST);
-                /*
+                /**
                  * Thrown if Google Play services canceled the original
                  * PendingIntent
                  */
@@ -273,7 +278,7 @@ public class MainActivity extends Activity implements
                 // e.printStackTrace();
             // }
         // } else {
-            /*
+            /**
              * If no resolution is available, display a dialog to the
              * user with the error.
              */
@@ -286,7 +291,7 @@ public class MainActivity extends Activity implements
     public void onNavigate(View view)
     {
             Intent intent = new Intent(this, LocationFetcherActivity.class);
-            startActivityForResult(intent, FETCH_START_AND_DESTINATION);
+            startActivityForResult(intent, FETCH_START_AND_DESTINATION_REQUEST);
     }
 
     // Double confirmation that the user should enable bluetooth using dialog.
