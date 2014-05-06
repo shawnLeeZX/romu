@@ -15,7 +15,7 @@ import android.os.Bundle;
  * a container of dialog. You need to creat the dialog you want and use
  * setDialog method to set the dialog to display.
  */
-public class ConfirmationDialogFragment extends DialogFragment
+public class WayfarerDialogFragment extends DialogFragment
 {
     private Dialog dialog = null;
 

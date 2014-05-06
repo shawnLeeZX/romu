@@ -12,10 +12,14 @@
 
 
     <!-- For Bluetooth Confirmation Dialog. -->
-    <string name="confirmation">Bluetooth Needed</string>
-    <!-- For General Confirmation Dialog. -->
-    <string name="confirm_dialog_ok">OK</string>
-    <string name="confirm_dialog_cancel">Cancel</string>
+    <string name="bluetooth_prompt">Bluetooth Needed</string>
+    <!-- For Bluetooth Confirmation Dialog. -->
+    <string name="googleplay_service_prompt">Google Play Service Needed</string>
+
+    <!-- For General Prompt Dialog. -->
+    <string name="prompt_dialog_ok">OK</string>
+    <string name="prompt_dialog_cancel">Cancel</string>
+    <string name="prompt_dialog_quit">Quit</string>
 
     <!-- For LocationFetchActivity. -->
     <!-- ========================================================= -->

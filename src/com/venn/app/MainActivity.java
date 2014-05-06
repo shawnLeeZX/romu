@@ -33,6 +33,8 @@ package com.venn.app;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
+
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.*;
 import com.google.android.gms.maps.*;
 
@@ -91,7 +93,10 @@ public class MainActivity extends Activity implements
         enableBluetooth();
 
         // TODO: error handler and location listener for locationClient undone.
-        locationClient = new LocationClient(this, this, this);
+        if(servicesConnected())
+            locationClient = new LocationClient(this, this, this);
+        else
+            Log.e(LOG_TAG, "Cannot connect to Google Play Service. Program should not reach here.");
 
         renderMap();
         Log.d(LOG_TAG, "Map render finishes.");
@@ -199,8 +204,37 @@ public class MainActivity extends Activity implements
 
                     break;
                 }
+            case CONNECTION_FAILURE_RESOLUTION_REQUEST:
+                {
+                    // If google play service resolves the problem, do the
+                    // request again.
+                    if(resultCode == RESULT_OK)
+                        servicesConnected();
+                    else
+                    {
+                        // Show the dialog to inform user google play service
+                        // must be present to use the app and quit.
+                        Dialog dialog = new AlertDialog.Builder(this)
+                            .setTitle(R.string.googleplay_service_prompt)
+                            .setPositiveButton(R.string.prompt_dialog_quit,
+                                    new DialogInterface.OnClickListener()
+                                    {
+                                        public void onClick(DialogInterface dialog, int whichButton)
+                                        {
+                                            finish();
+                                        }
+                                    }
+                            )
+                            .create();
+
+                        WayfarerDialogFragment fragment = new WayfarerDialogFragment();
+                        fragment.setDialog(dialog);
+
+                        fragment.show(fragmentManager, "google_play_service_prompt");
+                    }
+                }
             default:
-                Log.e("venn", "Activity result out of range.");
+                Log.e(LOG_TAG, "Activity result out of range.");
         }
     }
 
@@ -294,13 +328,52 @@ public class MainActivity extends Activity implements
             startActivityForResult(intent, FETCH_START_AND_DESTINATION_REQUEST);
     }
 
+    private boolean servicesConnected()
+    {
+            // Check that Google Play services is available
+            int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+            // If Google Play services is available
+            if (ConnectionResult.SUCCESS == resultCode) {
+                // In debug mode, log the status
+                Log.d("Location Updates",
+                        "Google Play services is available.");
+                // Continue
+                return true;
+            // Google Play services was not available for some reason
+            } else {
+                // Get the error code
+                int errorCode = resultCode;
+                // Get the error dialog from Google Play services
+                Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(
+                        errorCode,
+                        this,
+                        CONNECTION_FAILURE_RESOLUTION_REQUEST);
+
+                // If Google Play services can provide an error dialog
+                if (errorDialog != null) {
+                    // Create a new DialogFragment for the error dialog
+                    WayfarerDialogFragment errorFragment =
+                            new WayfarerDialogFragment();
+                    // Set the dialog in the DialogFragment
+                    errorFragment.setDialog(errorDialog);
+                    // Show the error dialog in the DialogFragment
+                    errorFragment.show(fragmentManager,
+                            "Location Updates");
+                }
+
+                // If no error dialog obtained, just return false. We cannot
+                // connect to Google Play Service.
+                return false;
+            }
+        }
+
     // Double confirmation that the user should enable bluetooth using dialog.
     private void showBluetoothConfirmDialog()
     {
         // Create an dialog and pass it to ConfirmationDialogFragment to render.
         Dialog dialog = new AlertDialog.Builder(this)
-            .setTitle(R.string.confirmation)
-            .setPositiveButton(R.string.confirm_dialog_ok,
+            .setTitle(R.string.bluetooth_prompt)
+            .setPositiveButton(R.string.prompt_dialog_ok,
                     new DialogInterface.OnClickListener()
                     {
                         public void onClick(DialogInterface dialog, int whichButton)
@@ -309,7 +382,7 @@ public class MainActivity extends Activity implements
                         }
                     }
             )
-            .setNegativeButton(R.string.confirm_dialog_cancel,
+            .setNegativeButton(R.string.prompt_dialog_cancel,
                     new DialogInterface.OnClickListener()
                     {
                         public void onClick(DialogInterface dialog, int whichButton)
@@ -321,7 +394,7 @@ public class MainActivity extends Activity implements
             )
             .create();
 
-        ConfirmationDialogFragment fragment = new ConfirmationDialogFragment();
+        WayfarerDialogFragment fragment = new WayfarerDialogFragment();
         fragment.setDialog(dialog);
 
         fragment.show(fragmentManager, "bluetooth_comfirmation");
