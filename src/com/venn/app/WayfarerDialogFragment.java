@@ -8,12 +8,15 @@ import android.os.Bundle;
 
 /**
  * class ConfirmationDialogue
- * @author Shawn
- *
  * This class is reponsible for displaying a dialog fragment for any purpose of
- * user interaction. It is programmed to be rather general, which only plays as
+ * user interaction.
+ *
+ * It is programmed to be rather general, which only plays as
  * a container of dialog. You need to creat the dialog you want and use
  * setDialog method to set the dialog to display.
+ *
+ * @author Shawn
+ *
  */
 public class WayfarerDialogFragment extends DialogFragment
 {
@@ -38,6 +41,11 @@ public class WayfarerDialogFragment extends DialogFragment
         return dialog;
     }
 
+    /**
+     * Call this function to pass in your customized dialog.
+     *
+     * @param dialog
+     */
     public void setDialog(Dialog dialog)
     {
         this.dialog = dialog;
