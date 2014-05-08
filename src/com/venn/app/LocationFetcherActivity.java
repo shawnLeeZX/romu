@@ -65,7 +65,10 @@ public class LocationFetcherActivity extends Activity
         destAddrAutoCompleteTextView.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.list_item));
     }
 
-    // This will fetch user input from text field and return it back for caller.
+    /**
+     * Callback function of Button "OK" in this activity. This will fetch user
+     * input from text field and return it back for caller.
+     */
     public void onConfirm(View view)
     {
         String startAddress = startAddrAutoCompleteTextView.getText().toString();
@@ -79,8 +82,10 @@ public class LocationFetcherActivity extends Activity
         finish();
     }
 
-    // This adaptor is used by AutoCompleteTextView to fill up auto complete
-    // list.
+    /**
+     * This adaptor class is used by AutoCompleteTextView to fill up auto
+     * complete list.
+     */
     private class PlacesAutoCompleteAdapter extends ArrayAdapter<String> implements Filterable
     {
         private ArrayList<String> resultList;
@@ -129,8 +134,14 @@ public class LocationFetcherActivity extends Activity
         }
     }
 
-    // PlacesAutoCompleteAdapter calls this function to use Google Place
-    // AutoComplete API to fetch potential places.
+    /**
+     * PlacesAutoCompleteAdapter calls this function to use Google Place
+     * AutoComplete API to fetch potential places.
+     *
+     * @param input partial input string needed completion by Google Place
+     *              AutoComplete Service.
+     * @return      ArrayList<String> to be loaded by AutoCompleteTextView.
+     */
     private ArrayList<String> autocomplete(String input)
     {
         ArrayList<String> resultList = null;

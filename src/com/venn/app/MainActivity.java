@@ -73,8 +73,8 @@ public class MainActivity extends Activity implements
     private LocationClient locationClient   = null;
 
     // Global naviation info.
-    String startAddress    = null;
-    String destAddress      = null;
+    String startAddr = null;
+    String destAddr  = null;
 
     /** Called when the activity is first created. */
     @Override
@@ -154,12 +154,16 @@ public class MainActivity extends Activity implements
         }
     }
 
+    /**
+     * Initial rendering of Google Map at app startup.
+     */
     private void renderMap()
     {
         setUpMapIfNeeded();
         map.setMyLocationEnabled(true);
     }
 
+    // Unfinished.
     public void enableBluetooth()
     {
         // Enable bluetooth if not, otherwise do nothing.
@@ -197,10 +201,10 @@ public class MainActivity extends Activity implements
                     }
                     Log.d(LOG_TAG, "Location fetcher finished successfully.");
                     Bundle bundle   = data.getExtras();
-                    startAddress   = bundle.getString(LocationFetcherActivity.START_ADDR_STRING);
-                    Log.d(LOG_TAG, "Start location fetched: " + startAddress);
-                    destAddress     = bundle.getString(LocationFetcherActivity.DEST_ADDR_STRING);
-                    Log.d(LOG_TAG, "Destination fetched: " + destAddress);
+                    startAddr    = bundle.getString(LocationFetcherActivity.START_ADDR_STRING);
+                    Log.d(LOG_TAG, "Start location fetched: " + startAddr);
+                    destAddr     = bundle.getString(LocationFetcherActivity.DEST_ADDR_STRING);
+                    Log.d(LOG_TAG, "Destination fetched: " + destAddr);
 
                     break;
                 }
@@ -328,6 +332,10 @@ public class MainActivity extends Activity implements
             startActivityForResult(intent, FETCH_START_AND_DESTINATION_REQUEST);
     }
 
+    /**
+     * Check and handle the availability of Google Play Service, which is
+     * essential for LocationService provided by android.
+     */
     private boolean servicesConnected()
     {
             // Check that Google Play services is available
@@ -367,7 +375,10 @@ public class MainActivity extends Activity implements
             }
         }
 
-    // Double confirmation that the user should enable bluetooth using dialog.
+    /**
+     * Double confirmation that the user should enable bluetooth using dialog.
+     * TODO: swtich this to bluetooth Gatt.
+     */
     private void showBluetoothConfirmDialog()
     {
         // Create an dialog and pass it to ConfirmationDialogFragment to render.
