@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Currently location fetch interface consists only of two text field that get
-     start location and destination and a button to confirm user input.-->
+<!-- Currently address fetch interface consists only of two text field that get
+     start address and destination and a button to confirm user input.-->
 <LinearLayout xmlns:android = "http://schemas.android.com/apk/res/android"
     android:layout_width    = "match_parent"
     android:layout_height   = "match_parent"
@@ -15,16 +15,19 @@
         android:layout_height   = "wrap_content"
         android:orientation      = "vertical"
         >
-        <EditText android:id = "@+id/start_location"
+        <AutoCompleteTextView
+            android:id = "@+id/start_addr"
             android:layout_width    = "match_parent"
             android:layout_height   = "wrap_content"
-            android:hint            = "@string/start_location"
+            android:hint            = "@string/start_addr"
+            android:completionThreshold = "5"
             />
 
-        <EditText android:id = "@+id/destination"
+        <AutoCompleteTextView
+            android:id = "@+id/dest_addr"
             android:layout_width    = "match_parent"
             android:layout_height   = "wrap_content"
-            android:hint            = "@string/destination"
+            android:hint            = "@string/dest_addr"
             />
     </LinearLayout>
     <Button

@@ -57,7 +57,7 @@ public class MainActivity extends Activity implements
     GooglePlayServicesClient.ConnectionCallbacks,
     GooglePlayServicesClient.OnConnectionFailedListener
 {
-    public static final String LOG_TAG = "Venn";
+    public static final String LOG_TAG = "Venn:MainActivity";
 
     // UI.
     private FragmentManager fragmentManager = null;
@@ -73,8 +73,8 @@ public class MainActivity extends Activity implements
     private LocationClient locationClient   = null;
 
     // Global naviation info.
-    String startLocation    = null;
-    String destination      = null;
+    String startAddress    = null;
+    String destAddress      = null;
 
     /** Called when the activity is first created. */
     @Override
@@ -197,10 +197,10 @@ public class MainActivity extends Activity implements
                     }
                     Log.d(LOG_TAG, "Location fetcher finished successfully.");
                     Bundle bundle   = data.getExtras();
-                    startLocation   = bundle.getString(LocationFetcherActivity.START_LOCATION_STRING);
-                    Log.d(LOG_TAG, "Start location fetched: " + startLocation);
-                    destination     = bundle.getString(LocationFetcherActivity.DESTINATION_STRING);
-                    Log.d(LOG_TAG, "Destination fetched: " + destination);
+                    startAddress   = bundle.getString(LocationFetcherActivity.START_ADDR_STRING);
+                    Log.d(LOG_TAG, "Start location fetched: " + startAddress);
+                    destAddress     = bundle.getString(LocationFetcherActivity.DEST_ADDR_STRING);
+                    Log.d(LOG_TAG, "Destination fetched: " + destAddress);
 
                     break;
                 }

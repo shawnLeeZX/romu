@@ -23,9 +23,9 @@
 
     <!-- For LocationFetchActivity. -->
     <!-- ========================================================= -->
-    <string name="start_location">Start Location</string>
-    <string name="destination">Destination</string>
-    <string name="button_ok">ok</string>
+    <string name="start_addr">Start Address</string>
+    <string name="dest_addr">Destination</string>
+    <string name="button_ok">OK</string>
     <!-- ========================================================= -->
 
 </resources>
