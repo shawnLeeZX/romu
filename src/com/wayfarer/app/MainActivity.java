@@ -505,7 +505,7 @@ public class MainActivity extends Activity implements
         sBuilder.append(startAddr);
         sBuilder.append("&destination=");
         sBuilder.append(destAddr);
-        sBuilder.append("&sensor=true&mode=walking");
+        sBuilder.append("&sensor=true&mode=walking&key" + Utilities.API_KEY);
 
         String requestUrl = sBuilder.toString();
         try {

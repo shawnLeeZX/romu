@@ -10,13 +10,17 @@ import android.util.Log;
 /**
  * class Utilities
  * Class functions as Mixin class since Java does not support multiple
- * inheritance, which contains common utility methods.
+ * inheritance, which contains common utility methods and global shared
+ * variables.
  *
  * @author Shawn
  */
 public class Utilities
 {
     private static final String LOG_TAG = "Farwayer: Utilities";
+
+    // Google server API.
+    public static final String API_KEY = "AIzaSyAb66BJt0Ri3zNOfJMbPycC09Lv3p4isHw";
 
     /**
       * Convert an inputstream to a string.

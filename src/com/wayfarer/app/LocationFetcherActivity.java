@@ -41,9 +41,6 @@ public class LocationFetcherActivity extends Activity
     private static final String TYPE_AUTOCOMPLETE = "/autocomplete";
     private static final String OUT_JSON = "/json";
 
-    // Google Server API.
-    private static final String API_KEY = "AIzaSyAb66BJt0Ri3zNOfJMbPycC09Lv3p4isHw";
-
     // Logging.
     private static final String LOG_TAG = "Farwayer:LocationFetcherActivity";
 
@@ -155,7 +152,7 @@ public class LocationFetcherActivity extends Activity
         try {
             StringBuilder sb = new StringBuilder(PLACES_API_BASE + TYPE_AUTOCOMPLETE + OUT_JSON);
             // TODO: enable location sensor when refining.
-            sb.append("?sensor=false&key=" + API_KEY);
+            sb.append("?sensor=false&key=" + Utilities.API_KEY);
             // TODO: try automatically determine country when refining.
             sb.append("&components=country:cn");
             sb.append("&input=" + URLEncoder.encode(input, "utf8"));
