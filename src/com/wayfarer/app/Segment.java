@@ -1,4 +1,4 @@
-package com.venn.app;
+package com.wayfarer.app;
 
 import com.google.android.gms.maps.model.LatLng;
 

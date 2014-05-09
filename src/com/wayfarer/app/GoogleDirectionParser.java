@@ -1,4 +1,4 @@
-package com.venn.app;
+package com.wayfarer.app;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +26,7 @@ import android.util.Log;
  */
 public class GoogleDirectionParser
 {
-    private static final String LOG_TAG = "Venn: GoogleDirectionParser";
+    private static final String LOG_TAG = "Wayfarer: GoogleDirectionParser";
 
     private URL requestUrl = null;
     private HttpURLConnection conn = null;

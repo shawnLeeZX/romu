@@ -1,4 +1,4 @@
-package com.venn.app;
+package com.wayfarer.app;
 
 import java.io.BufferedReader;
 import java.io.IOException;

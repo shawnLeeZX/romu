@@ -1,4 +1,4 @@
-package com.venn.app;
+package com.wayfarer.app;
 
 import android.app.AlertDialog;
 import android.app.Dialog;

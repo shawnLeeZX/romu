@@ -1,4 +1,4 @@
-package com.venn.app;
+package com.wayfarer.app;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -33,8 +33,8 @@ import android.widget.Filterable;
 public class LocationFetcherActivity extends Activity
 {
     // Message exchange names.
-    public final static String START_ADDR_STRING   = "com.venn.app.START_ADDR";
-    public final static String DEST_ADDR_STRING      = "com.venn.app.DEST_ADDR";
+    public final static String START_ADDR_STRING   = "com.wayfarer.app.START_ADDR";
+    public final static String DEST_ADDR_STRING      = "com.wayfarer.app.DEST_ADDR";
 
     // Google Place API needed.
     private static final String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place";

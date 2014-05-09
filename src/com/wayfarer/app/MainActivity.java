@@ -39,7 +39,7 @@
  *  crashes. And bluetooth is not functioning at all. You can remove any code
  *  concerning bluetooth.
  */
-package com.venn.app;
+package com.wayfarer.app;
 
 import java.net.MalformedURLException;
 
@@ -74,7 +74,7 @@ public class MainActivity extends Activity implements
     GooglePlayServicesClient.ConnectionCallbacks,
     GooglePlayServicesClient.OnConnectionFailedListener
 {
-    public static final String LOG_TAG = "Venn: MainActivity";
+    public static final String LOG_TAG = "Wayfarer: MainActivity";
 
     // UI.
     private FragmentManager fragmentManager = null;
