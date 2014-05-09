@@ -1,4 +1,7 @@
 /**
+ * Warfarer introduction:
+ * ==========================
+ *
  * The workflow of this app works like the following:
  * Initialization:
  *  The user is given a list to choose the correponding wearable deivce
@@ -9,7 +12,8 @@
  * At startup:
  *  if bluetooth is not enabled, it prompts user to enable bluetooth. If the
  *  user does not permit the action, permission of bluetooth will be asked each
- *  time it is needed.
+ *  time it is needed.(This part could be changed since I am not responsible for
+ *  the bluetooth part and the function to communicate with arduino is not implemented yet.)
  *
  *  Then the main interface is loaded, which is a map that gives the user a
  *  visual display on map of where she or he is.
@@ -19,15 +23,21 @@
  *
  * When user decide to do navigation:
  *  After the 'navigation' is clicked, the user is prompted to input a start
- *  location and a destination. User confirms the input by clicking the button
- *  'ok' 
+ *  location and a destination. Autocompletion will happen in this phase to give
+ *  right address decription to user as typing. User confirms the input by
+ *  clicking the button 'ok' 
  *
  * Upon confirmation:
- *  Given two locations, we want to go from the startLocation to destination.
- *  1. make a http requestion using Google Direction API.
- *  2. parse the response into meaningful results.
- *  3. process each segment of the route results one by one.
- *  TODO: more refinement needed.
+ *  After getting two address, utilizing Google Direction API service, all
+ *  information needed to travel from origin to destination is fetched and
+ *  stored in the {@link Route} class. At the same time, route will be displayed
+ *  on the map.
+ *  @Andrew, this is where you should take over. Route class have all the
+ *  information needed.
+ *  For now, location service is buggy. More specifically, the availability of
+ *  Google Play Service is not solid. When I disable location service, the app
+ *  crashes. And bluetooth is not functioning at all. You can remove any code
+ *  concerning bluetooth.
  */
 package com.venn.app;
 
@@ -98,10 +108,12 @@ public class MainActivity extends Activity implements
         // Since bluetooth plays a central role of this app, it will ask the
         // user to enable bluetooth at startup.
         // TODO: change bluetooth to BT Gatt.
+        // TODO: this part is undone. Modify is needed.
         bluetooth = BluetoothAdapter.getDefaultAdapter();
         enableBluetooth();
 
         // TODO: error handler and location listener for locationClient undone.
+        // TODO: this part is undone. location service is buggy. Modify is needed.
         locationServiceInitialization();
 
         renderMap();

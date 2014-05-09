@@ -12,7 +12,7 @@ import com.google.android.gms.maps.model.LatLng;
  */
 public class Segment
 {
-    // Points in this segment.
+    // Geographical points in this segment.
     private LatLng start;
     private LatLng end;
     // Turn instruction to reach next segment.
