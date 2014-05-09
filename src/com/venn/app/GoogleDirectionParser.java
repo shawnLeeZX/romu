@@ -13,6 +13,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 
 import android.util.Log;
 
@@ -91,8 +92,10 @@ public class GoogleDirectionParser
             }
 
             // Otherwise, continue.
+            //
             // Get the route object.
             final JSONObject jsonRoute = json.getJSONArray("routes").getJSONObject(0);
+
             // Get the leg, only one leg as we don't support waypoints.
             final JSONObject leg = jsonRoute.getJSONArray("legs").getJSONObject(0);
             // Get the steps for this leg.
@@ -105,6 +108,35 @@ public class GoogleDirectionParser
                     + " to "
                     + leg.getString("end_address")
                     );
+
+            // Set bounds of the route.
+            JSONObject routeBound = jsonRoute.getJSONObject("bounds");
+            JSONObject northeastBound = routeBound.getJSONObject("northeast");
+            LatLng northeast = new LatLng(
+                    northeastBound.getDouble("lat"),
+                    northeastBound.getDouble("lng")
+                    );
+            JSONObject southwestBound = routeBound.getJSONObject("southwest");
+            LatLng southwest = new LatLng(
+                    southwestBound.getDouble("lat"),
+                    southwestBound.getDouble("lng")
+                    );
+            route.setBounds(new LatLngBounds(southwest, northeast));
+
+            // Get info of origin and destination.
+            route.setStartAddr(leg.getString("start_address"));
+            JSONObject startLocation = leg.getJSONObject("start_location");
+            route.setStartLocation(new LatLng(
+                startLocation.getDouble("lat"),
+                startLocation.getDouble("lng")
+            ));
+            route.setDestAddr(leg.getString("end_address"));
+            JSONObject endLocation = leg.getJSONObject("end_location");
+            route.setEndLocation(new LatLng(
+                endLocation.getDouble("lat"),
+                endLocation.getDouble("lng")
+            ));
+
             // Get google's copyright notice (tos requirement).
             route.setCopyright(jsonRoute.getString("copyrights"));
             // Get the total length of the route.
@@ -112,8 +144,7 @@ public class GoogleDirectionParser
             // Get any warnings provided (tos requirement).
             if (!jsonRoute.getJSONArray("warnings").isNull(0))
             {
-                route.setWarning(jsonRoute.getJSONArray("warnings")
-                .getString(0));
+                route.setWarning(jsonRoute.getJSONArray("warnings").getString(0));
             }
 
            /**

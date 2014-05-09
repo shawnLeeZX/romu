@@ -39,6 +39,8 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.*;
 import com.google.android.gms.maps.*;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import android.app.Activity;
@@ -48,6 +50,7 @@ import android.app.FragmentManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -80,6 +83,7 @@ public class MainActivity extends Activity implements
     String startAddr = null;
     String destAddr  = null;
     Route currentRoute = null;
+    Location currentLocation = null;
 
     /** Called when the activity is first created. */
     @Override
@@ -98,14 +102,23 @@ public class MainActivity extends Activity implements
         enableBluetooth();
 
         // TODO: error handler and location listener for locationClient undone.
-        if(servicesConnected())
-            locationClient = new LocationClient(this, this, this);
-        else
-            Log.e(LOG_TAG, "Cannot connect to Google Play Service. Program should not reach here.");
+        locationServiceInitialization();
 
         renderMap();
         Log.d(LOG_TAG, "Map render finishes.");
+
         Log.d(LOG_TAG, "MainActivity initialized.");
+    }
+
+    private void locationServiceInitialization()
+    {
+        if(servicesConnected())
+            locationClient = new LocationClient(this, this, this);
+        else
+        {
+            Log.e(LOG_TAG, "Cannot connect to Google Play Service. Program should not reach here.");
+            return;
+        }
     }
 
     @Override
@@ -447,10 +460,25 @@ public class MainActivity extends Activity implements
         @Override
         protected void onPostExecute(Void result)
         {
+            // Draw route on the map.
             PolylineOptions routePolylineOptions = new PolylineOptions();
             routePolylineOptions.addAll(currentRoute.getPoints());
-
             map.addPolyline(routePolylineOptions);
+
+            // Draw marker on origin and destination.
+            map.addMarker(new MarkerOptions()
+                    .position(currentRoute.getStartLocation())
+                    .title(currentRoute.getStartAddr())
+                    );
+            map.addMarker(new MarkerOptions()
+                    .position(currentRoute.getEndLocation())
+                    .title(currentRoute.getDestAddr())
+                    );
+
+            // Set camera to the route.
+            // TODO: adjust the padding when refining.
+            // TODO: add animation when moving camera.
+            map.moveCamera(CameraUpdateFactory.newLatLngBounds(currentRoute.getBounds(), 0));
         }
 }
 

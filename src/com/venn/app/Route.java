@@ -3,6 +3,7 @@ package com.venn.app;
 import java.util.ArrayList;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 
 /**
  * class Route
@@ -16,10 +17,16 @@ import com.google.android.gms.maps.model.LatLng;
 public class Route
 {
     private String name;
-
     private String copyright;
     private String warning;
     private int length;
+
+    private String startAddr;
+    private String endAddr;
+    private LatLng startLocation;
+    private LatLng endLocation;
+
+    private LatLngBounds bounds;
 
     private final ArrayList<Segment> segments;
 
@@ -108,4 +115,54 @@ public class Route
     {
         return copyright;
     }
+
+	public LatLngBounds getBounds()
+	{
+		return bounds;
+	}
+
+	public void setBounds(LatLngBounds bounds)
+	{
+		this.bounds = bounds;
+	}
+
+	public String getStartAddr()
+	{
+		return startAddr;
+	}
+
+	public void setStartAddr(String startAddr)
+	{
+		this.startAddr = startAddr;
+	}
+
+	public String getDestAddr()
+	{
+		return endAddr;
+	}
+
+	public void setDestAddr(String destAddr)
+	{
+		this.endAddr = destAddr;
+	}
+
+	public LatLng getStartLocation()
+	{
+		return startLocation;
+	}
+
+	public void setStartLocation(LatLng startLocation)
+	{
+		this.startLocation = startLocation;
+	}
+
+	public LatLng getEndLocation()
+	{
+		return endLocation;
+	}
+
+	public void setEndLocation(LatLng destLocation)
+	{
+		this.endLocation = destLocation;
+	}
 }
