@@ -162,8 +162,6 @@ public class LocationFetcherActivity extends Activity
 
             // Load the results into a String.
             jsonResults = Utilities.convertStreamToString(conn.getInputStream());
-
-            Log.d(LOG_TAG, jsonResults);
         } catch (MalformedURLException e) {
             Log.e(LOG_TAG, "Error processing Places API URL", e);
             return resultList;
