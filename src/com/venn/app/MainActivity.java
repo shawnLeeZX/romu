@@ -31,12 +31,15 @@
  */
 package com.venn.app;
 
+import java.net.MalformedURLException;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
-
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.*;
 import com.google.android.gms.maps.*;
+
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -45,6 +48,7 @@ import android.app.FragmentManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -57,7 +61,7 @@ public class MainActivity extends Activity implements
     GooglePlayServicesClient.ConnectionCallbacks,
     GooglePlayServicesClient.OnConnectionFailedListener
 {
-    public static final String LOG_TAG = "Venn:MainActivity";
+    public static final String LOG_TAG = "Venn: MainActivity";
 
     // UI.
     private FragmentManager fragmentManager = null;
@@ -75,6 +79,7 @@ public class MainActivity extends Activity implements
     // Global naviation info.
     String startAddr = null;
     String destAddr  = null;
+    Route currentRoute = null;
 
     /** Called when the activity is first created. */
     @Override
@@ -206,6 +211,8 @@ public class MainActivity extends Activity implements
                     destAddr     = bundle.getString(LocationFetcherActivity.DEST_ADDR_STRING);
                     Log.d(LOG_TAG, "Destination fetched: " + destAddr);
 
+                    getRouteByRequestingGoogle();
+
                     break;
                 }
             case CONNECTION_FAILURE_RESOLUTION_REQUEST:
@@ -291,10 +298,11 @@ public class MainActivity extends Activity implements
     /*
      * Called by Location Services if the attempt to
      * Location Services fails.
+     * TODO: clean this up when finishing writing route parsing.
      */
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-
+    public void onConnectionFailed(ConnectionResult connectionResult)
+    {
         /**
          * Google Play services can resolve some errors it detects.
          * If the error has a resolution, try sending an Intent to
@@ -328,8 +336,8 @@ public class MainActivity extends Activity implements
     // to let user specify start location and destination.
     public void onNavigate(View view)
     {
-            Intent intent = new Intent(this, LocationFetcherActivity.class);
-            startActivityForResult(intent, FETCH_START_AND_DESTINATION_REQUEST);
+        Intent intent = new Intent(this, LocationFetcherActivity.class);
+        startActivityForResult(intent, FETCH_START_AND_DESTINATION_REQUEST);
     }
 
     /**
@@ -409,6 +417,64 @@ public class MainActivity extends Activity implements
         fragment.setDialog(dialog);
 
         fragment.show(fragmentManager, "bluetooth_comfirmation");
+    }
+
+    /**
+     * Make request to Google Direction API to get route from start address to
+     * destination address in another thread.
+     *
+     * start_addr, dest_addr and route are all class memebers, so no parameters
+     * are passed.
+     */
+    private void getRouteByRequestingGoogle()
+    {
+        new GetRoutes().execute();
+    }
+
+    private class GetRoutes extends AsyncTask<String, Void, Void>
+    {
+        @Override
+        protected void onPreExecute() {}
+
+        @Override
+        protected Void doInBackground(String... params)
+        {
+            currentRoute = directions(startAddr, destAddr);
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result)
+        {
+            PolylineOptions routePolylineOptions = new PolylineOptions();
+            routePolylineOptions.addAll(currentRoute.getPoints());
+
+            map.addPolyline(routePolylineOptions);
+        }
+}
+
+    private Route directions(String startAddr, String destAddr)
+    {
+        Route route = null;
+
+        // Construct http request to Google Direction API service.
+        String jsonURL = "http://maps.googleapis.com/maps/api/directions/json?";
+        StringBuilder sBuilder = new StringBuilder(jsonURL);
+        sBuilder.append("origin=");
+        sBuilder.append(startAddr);
+        sBuilder.append("&destination=");
+        sBuilder.append(destAddr);
+        sBuilder.append("&sensor=true&mode=walking");
+
+        String requestUrl = sBuilder.toString();
+        try {
+            final GoogleDirectionParser parser = new GoogleDirectionParser(requestUrl);
+            route = parser.parse();
+        } catch (MalformedURLException e) {
+            Log.e(LOG_TAG, "Error when parsing url.");
+        }
+        return route;
     }
 
 }

@@ -71,12 +71,16 @@ public class LocationFetcherActivity extends Activity
      */
     public void onConfirm(View view)
     {
-        String startAddress = startAddrAutoCompleteTextView.getText().toString();
-        String destAddress = destAddrAutoCompleteTextView.getText().toString();
+        String startAddr = startAddrAutoCompleteTextView.getText().toString();
+        String destAddr = destAddrAutoCompleteTextView.getText().toString();
+
+        // Replace space with %20.
+        startAddr = startAddr.replace(" ", "%20");
+        destAddr = destAddr.replace(" ", "%20");
 
         Intent intent = getIntent();
-        intent.putExtra(START_ADDR_STRING, startAddress);
-        intent.putExtra(DEST_ADDR_STRING, destAddress);
+        intent.putExtra(START_ADDR_STRING, startAddr);
+        intent.putExtra(DEST_ADDR_STRING, destAddr);
 
         setResult(RESULT_OK, intent);
         finish();
@@ -147,7 +151,7 @@ public class LocationFetcherActivity extends Activity
         ArrayList<String> resultList = null;
 
         HttpURLConnection conn = null;
-        StringBuilder jsonResults = new StringBuilder();
+        String jsonResults = null;
         try {
             StringBuilder sb = new StringBuilder(PLACES_API_BASE + TYPE_AUTOCOMPLETE + OUT_JSON);
             // TODO: enable location sensor when refining.
@@ -158,15 +162,11 @@ public class LocationFetcherActivity extends Activity
 
             URL url = new URL(sb.toString());
             conn = (HttpURLConnection) url.openConnection();
-            InputStreamReader in = new InputStreamReader(conn.getInputStream());
 
-            // Load the results into a StringBuilder
-            int read;
-            char[] buff = new char[1024];
-            while ((read = in.read(buff)) != -1) {
-                jsonResults.append(buff, 0, read);
-            }
-            Log.d(LOG_TAG, jsonResults.toString());
+            // Load the results into a String.
+            jsonResults = Utilities.convertStreamToString(conn.getInputStream());
+
+            Log.d(LOG_TAG, jsonResults);
         } catch (MalformedURLException e) {
             Log.e(LOG_TAG, "Error processing Places API URL", e);
             return resultList;
@@ -182,7 +182,7 @@ public class LocationFetcherActivity extends Activity
         try {
             // Check whether Place Autocomplete API functions normally. If not,
             // return.
-            JSONObject jsonObj = new JSONObject(jsonResults.toString());
+            JSONObject jsonObj = new JSONObject(jsonResults);
             String autocompleteResponceStatus = jsonObj.getString("status");
             if(!autocompleteResponceStatus.equals("OK"))
             {
