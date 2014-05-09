@@ -42,8 +42,11 @@ public class GoogleDirectionParser
      */
     public GoogleDirectionParser(String urlString) throws MalformedURLException
     {
-        // requestUrl = new URL(urlString);
-        requestUrl = new URL("https://maps.googleapis.com/maps/api/directions/json?origin=Beijing%20Railway%20Station,%20Beijing%20Station%20East%20Street,%20Dongcheng,%20Beijing,%20China,%20100010&destination=Beijing,%20China&sensor=true&mode=walking&key=AIzaSyAb66BJt0Ri3zNOfJMbPycC09Lv3p4isHw");
+        // Comment this when debugging.
+        requestUrl = new URL(urlString);
+        // Uncomment this when debugging, through which you do not need to input
+        // origin and destination in LocationFetchActivity.
+        // requestUrl = new URL("https://maps.googleapis.com/maps/api/directions/json?origin=Beijing%20Railway%20Station,%20Beijing%20Station%20East%20Street,%20Dongcheng,%20Beijing,%20China,%20100010&destination=Beijing,%20China&sensor=true&mode=walking&key=AIzaSyAb66BJt0Ri3zNOfJMbPycC09Lv3p4isHw");
     }
 
     /**
