@@ -116,53 +116,53 @@ public class Route
         return copyright;
     }
 
-	public LatLngBounds getBounds()
-	{
-		return bounds;
-	}
+    public LatLngBounds getBounds()
+    {
+        return bounds;
+    }
 
-	public void setBounds(LatLngBounds bounds)
-	{
-		this.bounds = bounds;
-	}
+    public void setBounds(LatLngBounds bounds)
+    {
+        this.bounds = bounds;
+    }
 
-	public String getStartAddr()
-	{
-		return startAddr;
-	}
+    public String getStartAddr()
+    {
+        return startAddr;
+    }
 
-	public void setStartAddr(String startAddr)
-	{
-		this.startAddr = startAddr;
-	}
+    public void setStartAddr(String startAddr)
+    {
+        this.startAddr = startAddr;
+    }
 
-	public String getDestAddr()
-	{
-		return endAddr;
-	}
+    public String getDestAddr()
+    {
+        return endAddr;
+    }
 
-	public void setDestAddr(String destAddr)
-	{
-		this.endAddr = destAddr;
-	}
+    public void setDestAddr(String destAddr)
+    {
+        this.endAddr = destAddr;
+    }
 
-	public LatLng getStartLocation()
-	{
-		return startLocation;
-	}
+    public LatLng getStartLocation()
+    {
+        return startLocation;
+    }
 
-	public void setStartLocation(LatLng startLocation)
-	{
-		this.startLocation = startLocation;
-	}
+    public void setStartLocation(LatLng startLocation)
+    {
+        this.startLocation = startLocation;
+    }
 
-	public LatLng getEndLocation()
-	{
-		return endLocation;
-	}
+    public LatLng getEndLocation()
+    {
+        return endLocation;
+    }
 
-	public void setEndLocation(LatLng destLocation)
-	{
-		this.endLocation = destLocation;
-	}
+    public void setEndLocation(LatLng destLocation)
+    {
+        this.endLocation = destLocation;
+    }
 }
