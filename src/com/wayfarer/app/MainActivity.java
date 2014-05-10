@@ -492,29 +492,29 @@ public class MainActivity extends Activity implements
             // TODO: add animation when moving camera.
             map.moveCamera(CameraUpdateFactory.newLatLngBounds(currentRoute.getBounds(), 0));
         }
-}
 
-    private Route directions(String startAddr, String destAddr)
-    {
-        Route route = null;
+        private Route directions(String startAddr, String destAddr)
+        {
+            Route route = null;
 
-        // Construct http request to Google Direction API service.
-        String jsonURL = "http://maps.googleapis.com/maps/api/directions/json?";
-        StringBuilder sBuilder = new StringBuilder(jsonURL);
-        sBuilder.append("origin=");
-        sBuilder.append(startAddr);
-        sBuilder.append("&destination=");
-        sBuilder.append(destAddr);
-        sBuilder.append("&sensor=true&mode=walking&key" + Utilities.API_KEY);
+            // Construct http request to Google Direction API service.
+            String jsonURL = "http://maps.googleapis.com/maps/api/directions/json?";
+            StringBuilder sBuilder = new StringBuilder(jsonURL);
+            sBuilder.append("origin=");
+            sBuilder.append(startAddr);
+            sBuilder.append("&destination=");
+            sBuilder.append(destAddr);
+            sBuilder.append("&sensor=true&mode=walking&key" + Utilities.API_KEY);
 
-        String requestUrl = sBuilder.toString();
-        try {
-            final GoogleDirectionParser parser = new GoogleDirectionParser(requestUrl);
-            route = parser.parse();
-        } catch (MalformedURLException e) {
-            Log.e(LOG_TAG, "Error when parsing url.");
+            String requestUrl = sBuilder.toString();
+            try {
+                final GoogleDirectionParser parser = new GoogleDirectionParser(requestUrl);
+                route = parser.parse();
+            } catch (MalformedURLException e) {
+                Log.e(LOG_TAG, "Error when parsing url.");
+            }
+            return route;
         }
-        return route;
-    }
 
+    }
 }

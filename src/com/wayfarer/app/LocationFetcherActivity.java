@@ -154,7 +154,7 @@ public class LocationFetcherActivity extends Activity
             // TODO: enable location sensor when refining.
             sb.append("?sensor=false&key=" + Utilities.API_KEY);
             // TODO: try automatically determine country when refining.
-            sb.append("&components=country:cn");
+            // sb.append("&components=country:cn");
             sb.append("&input=" + URLEncoder.encode(input, "utf8"));
 
             URL url = new URL(sb.toString());
