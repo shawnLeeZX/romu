@@ -1,4 +1,4 @@
-package com.wayfarer.app;
+package com.romu.app;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,7 +17,7 @@ import android.util.Log;
  */
 public class Utilities
 {
-    private static final String LOG_TAG = "Farwayer: Utilities";
+    private static final String LOG_TAG = "Romu: Utilities";
 
     // Google server API.
     public static final String API_KEY = "AIzaSyAb66BJt0Ri3zNOfJMbPycC09Lv3p4isHw";

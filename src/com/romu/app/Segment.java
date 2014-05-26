@@ -1,4 +1,4 @@
-package com.wayfarer.app;
+package com.romu.app;
 
 import com.google.android.gms.maps.model.LatLng;
 

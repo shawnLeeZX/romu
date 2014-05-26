@@ -1,4 +1,4 @@
-package com.wayfarer.app;
+package com.romu.app;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -18,7 +18,7 @@ import android.os.Bundle;
  * @author Shawn
  *
  */
-public class WayfarerDialogFragment extends DialogFragment
+public class RomuDialogFragment extends DialogFragment
 {
     private Dialog dialog = null;
 

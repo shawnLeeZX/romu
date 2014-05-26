@@ -39,7 +39,7 @@
  *  crashes. And bluetooth is not functioning at all. You can remove any code
  *  concerning bluetooth.
  */
-package com.wayfarer.app;
+package com.romu.app;
 
 import java.net.MalformedURLException;
 
@@ -74,7 +74,7 @@ public class MainActivity extends Activity implements
     GooglePlayServicesClient.ConnectionCallbacks,
     GooglePlayServicesClient.OnConnectionFailedListener
 {
-    public static final String LOG_TAG = "Wayfarer: MainActivity";
+    public static final String LOG_TAG = "Romu: MainActivity";
 
     // UI.
     private FragmentManager fragmentManager = null;
@@ -263,7 +263,7 @@ public class MainActivity extends Activity implements
                             )
                             .create();
 
-                        WayfarerDialogFragment fragment = new WayfarerDialogFragment();
+                        RomuDialogFragment fragment = new RomuDialogFragment();
                         fragment.setDialog(dialog);
 
                         fragment.show(fragmentManager, "google_play_service_prompt");
@@ -393,8 +393,8 @@ public class MainActivity extends Activity implements
                 // If Google Play services can provide an error dialog
                 if (errorDialog != null) {
                     // Create a new DialogFragment for the error dialog
-                    WayfarerDialogFragment errorFragment =
-                            new WayfarerDialogFragment();
+                    RomuDialogFragment errorFragment =
+                            new RomuDialogFragment();
                     // Set the dialog in the DialogFragment
                     errorFragment.setDialog(errorDialog);
                     // Show the error dialog in the DialogFragment
@@ -438,7 +438,7 @@ public class MainActivity extends Activity implements
             )
             .create();
 
-        WayfarerDialogFragment fragment = new WayfarerDialogFragment();
+        RomuDialogFragment fragment = new RomuDialogFragment();
         fragment.setDialog(dialog);
 
         fragment.show(fragmentManager, "bluetooth_comfirmation");

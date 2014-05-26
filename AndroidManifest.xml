@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package               = "com.wayfarer.app"
+      package               = "com.romu.app"
       android:versionCode   = "1"
       android:versionName   = "1.0">
 
@@ -45,11 +45,11 @@
         </activity>
 
         <activity
-            android:name    = "com.wayfarer.app.LocationFetcherActivity"
-            android:parentActivityName = "com.wayfarer.app.MainActivity" >
+            android:name    = "com.romu.app.LocationFetcherActivity"
+            android:parentActivityName = "com.romu.app.MainActivity" >
             <meta-data
                 android:name    = "android.support.PARENT_ACTIVITY"
-                android:value   = "com.wayfarer.app.MainActivity" />
+                android:value   = "com.romu.app.MainActivity" />
         </activity>
 
         <meta-data
