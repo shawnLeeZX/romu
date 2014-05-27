@@ -1,5 +1,5 @@
 /**
- * Warfarer introduction:
+ * Romu introduction:
  * ==========================
  *
  * The workflow of this app works like the following:
@@ -46,10 +46,8 @@ import java.net.MalformedURLException;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.location.*;
 import com.google.android.gms.maps.*;
 
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -57,7 +55,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;
-import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
@@ -80,14 +77,11 @@ public class MainActivity extends Activity implements
     private FragmentManager fragmentManager = null;
 
     // Requestion code for user interaction activities.
-    private static final int ENABLE_BLUETOOTH_REQUEST               = 1;
     private static final int FETCH_START_AND_DESTINATION_REQUEST    = 2;
     private static final int CONNECTION_FAILURE_RESOLUTION_REQUEST  = 3;
 
     // Necessity class for Google services.
-    private BluetoothAdapter bluetooth      = null;
     private GoogleMap map                   = null;
-    private LocationClient locationClient   = null;
 
     // Global naviation info.
     String startAddr = null;
@@ -95,7 +89,12 @@ public class MainActivity extends Activity implements
     Route currentRoute = null;
     Location currentLocation = null;
 
-    /** Called when the activity is first created. */
+    // Life Cycle
+    // =====================================================================
+
+    /**
+     * Called when the activity is first created. 
+     */
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
@@ -105,32 +104,10 @@ public class MainActivity extends Activity implements
 
         fragmentManager = getFragmentManager();
 
-        // Since bluetooth plays a central role of this app, it will ask the
-        // user to enable bluetooth at startup.
-        // TODO: change bluetooth to BT Gatt.
-        // TODO: this part is undone. Modify is needed.
-        bluetooth = BluetoothAdapter.getDefaultAdapter();
-        enableBluetooth();
-
-        // TODO: error handler and location listener for locationClient undone.
-        // TODO: this part is undone. location service is buggy. Modify is needed.
-        locationServiceInitialization();
-
         renderMap();
         Log.d(LOG_TAG, "Map render finishes.");
 
         Log.d(LOG_TAG, "MainActivity initialized.");
-    }
-
-    private void locationServiceInitialization()
-    {
-        if(servicesConnected())
-            locationClient = new LocationClient(this, this, this);
-        else
-        {
-            Log.e(LOG_TAG, "Cannot connect to Google Play Service. Program should not reach here.");
-            return;
-        }
     }
 
     @Override
@@ -142,28 +119,30 @@ public class MainActivity extends Activity implements
         setUpMapIfNeeded();
     }
 
-    // Called when the Activity becomes visible.
+    /**
+     * Called when the Activity becomes visible.
+     */
     @Override
     protected void onStart()
     {
         super.onStart();
-
-        // Connect the location service.
-        locationClient.connect();
     }
 
-    /*
+    /**
      * Called when the Activity is no longer visible.
      */
     @Override
     protected void onStop() {
-        // Disconnecting the client invalidates it.
-        locationClient.disconnect();
         super.onStop();
     }
 
-    // Do a null check to confirm that we have initiated the map.
-    // During app's lifetime, This prevents map being destroyed after suspended.
+    // Private methods.
+    // ========================================================================
+
+    /**
+     * Do a null check to confirm that we have initiated the map.
+     * During app's lifetime, This prevents map being destroyed after suspended.
+     */
     private void setUpMapIfNeeded()
     {
         // Get the map if not.
@@ -190,35 +169,117 @@ public class MainActivity extends Activity implements
     private void renderMap()
     {
         setUpMapIfNeeded();
-        map.setMyLocationEnabled(true);
+        // map.setMyLocationEnabled(true);
     }
 
-    // Unfinished.
-    public void enableBluetooth()
+    // Naptic Navigation Related.
+    // =================================================================================
+
+    /**
+     * This is the entry point for haptic navigation. It will start an activity
+     * to let user specify start location and destination.
+     */
+    public void onNavigate(View view)
     {
-        // Enable bluetooth if not, otherwise do nothing.
-        Log.d(LOG_TAG, "Trying to enable bluetooth.");
-        if(!bluetooth.isEnabled())
-        {
-            Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(intent, ENABLE_BLUETOOTH_REQUEST);
-        }
+        Intent intent = new Intent(this, LocationFetcherActivity.class);
+        startActivityForResult(intent, FETCH_START_AND_DESTINATION_REQUEST);
     }
 
+    /**
+     * Make request to Google Direction API to get route from start address to
+     * destination address in another thread.
+     *
+     * start_addr, dest_addr and route are all class memebers, so no parameters
+     * are passed.
+     */
+    private void getRouteByRequestingGoogle()
+    {
+        new GetRoutes().execute();
+    }
+
+    /**
+     * Inner class responsible for retrieve route from Google Direction Service.
+     */
+    private class GetRoutes extends AsyncTask<String, Void, Void>
+    {
+        @Override
+        protected void onPreExecute() {}
+
+        @Override
+        protected Void doInBackground(String... params)
+        {
+            currentRoute = directions(startAddr, destAddr);
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result)
+        {
+            // Draw route on the map.
+            PolylineOptions routePolylineOptions = new PolylineOptions();
+            routePolylineOptions.addAll(currentRoute.getPoints());
+            map.addPolyline(routePolylineOptions);
+
+            // Draw marker on origin and destination.
+            map.addMarker(new MarkerOptions()
+                    .position(currentRoute.getStartLocation())
+                    .title(currentRoute.getStartAddr())
+                    );
+            map.addMarker(new MarkerOptions()
+                    .position(currentRoute.getEndLocation())
+                    .title(currentRoute.getDestAddr())
+                    );
+
+            // Set camera to the route.
+            // TODO: adjust the padding when refining.
+            // TODO: add animation when moving camera.
+            map.moveCamera(CameraUpdateFactory.newLatLngBounds(currentRoute.getBounds(), 0));
+        }
+
+        /**
+         * Given two address, get route from the origin address to the
+         * destination. This method uses Google API. Note that the address
+         * should be retrieved from Google to ensure its validity. Random
+         * arbitrary address will raise error.
+         *
+         * @param   startAddr   The origin of the route.
+         * @param   destAddr    The detination address.
+         *
+         * @return  Route       A class encapsule all information from Google.
+         *                      See {@link Route}.
+         */
+        private Route directions(String startAddr, String destAddr)
+        {
+            Route route = null;
+
+            // Construct http request to Google Direction API service.
+            String jsonURL = "http://maps.googleapis.com/maps/api/directions/json?";
+            StringBuilder sBuilder = new StringBuilder(jsonURL);
+            sBuilder.append("origin=");
+            sBuilder.append(startAddr);
+            sBuilder.append("&destination=");
+            sBuilder.append(destAddr);
+            sBuilder.append("&sensor=true&mode=walking&key" + Utilities.API_KEY);
+
+            String requestUrl = sBuilder.toString();
+            try {
+                final GoogleDirectionParser parser = new GoogleDirectionParser(requestUrl);
+                route = parser.parse();
+            } catch (MalformedURLException e) {
+                Log.e(LOG_TAG, "Error when parsing url.");
+            }
+            return route;
+        }
+
+    }
+
+    // Misc.
+    // ================================================================================
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         switch (requestCode)
         {
-            // Prompt user to enable bluetooth.
-            case ENABLE_BLUETOOTH_REQUEST:
-                {
-                    Log.d(LOG_TAG, "User cancelled enable bluetooth dialog. Confirming.");
-                    if(resultCode != RESULT_OK)
-                    {
-                        showBluetoothConfirmDialog();
-                    }
-                    break;
-                }
             case FETCH_START_AND_DESTINATION_REQUEST:
                 {
                     // Fetch the start location and destination from user input.
@@ -274,6 +335,8 @@ public class MainActivity extends Activity implements
         }
     }
 
+    // TODO: Clean up needed.
+    // ================================================================================
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu items for use in the action bar
@@ -320,51 +383,6 @@ public class MainActivity extends Activity implements
                 Toast.LENGTH_SHORT).show();
     }
 
-    /*
-     * Called by Location Services if the attempt to
-     * Location Services fails.
-     * TODO: clean this up when finishing writing route parsing.
-     */
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult)
-    {
-        /**
-         * Google Play services can resolve some errors it detects.
-         * If the error has a resolution, try sending an Intent to
-         * start a Google Play services activity that can resolve
-         * error.
-         */
-        // if (connectionResult.hasResolution()) {
-            // try {
-                // // Start an Activity that tries to resolve the error
-                // connectionResult.startResolutionForResult(
-                        // this,
-                        // CONNECTION_FAILURE_RESOLUTION_REQUEST);
-                /**
-                 * Thrown if Google Play services canceled the original
-                 * PendingIntent
-                 */
-            // } catch (IntentSender.SendIntentException e) {
-                // // Log the error
-                // e.printStackTrace();
-            // }
-        // } else {
-            /**
-             * If no resolution is available, display a dialog to the
-             * user with the error.
-             */
-            // showErrorDialog(connectionResult.getErrorCode());
-        // }
-    }
-
-    // This is the entry point for haptic navigation. It will start an activity
-    // to let user specify start location and destination.
-    public void onNavigate(View view)
-    {
-        Intent intent = new Intent(this, LocationFetcherActivity.class);
-        startActivityForResult(intent, FETCH_START_AND_DESTINATION_REQUEST);
-    }
-
     /**
      * Check and handle the availability of Google Play Service, which is
      * essential for LocationService provided by android.
@@ -409,112 +427,40 @@ public class MainActivity extends Activity implements
         }
 
     /**
-     * Double confirmation that the user should enable bluetooth using dialog.
-     * TODO: swtich this to bluetooth Gatt.
+     * Called by Location Services if the attempt to
+     * Location Services fails.
+     * TODO: clean this up when finishing writing route parsing.
      */
-    private void showBluetoothConfirmDialog()
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult)
     {
-        // Create an dialog and pass it to ConfirmationDialogFragment to render.
-        Dialog dialog = new AlertDialog.Builder(this)
-            .setTitle(R.string.bluetooth_prompt)
-            .setPositiveButton(R.string.prompt_dialog_ok,
-                    new DialogInterface.OnClickListener()
-                    {
-                        public void onClick(DialogInterface dialog, int whichButton)
-                        {
-                            enableBluetooth();
-                        }
-                    }
-            )
-            .setNegativeButton(R.string.prompt_dialog_cancel,
-                    new DialogInterface.OnClickListener()
-                    {
-                        public void onClick(DialogInterface dialog, int whichButton)
-                        {
-                            // Does nothing but quit the confirmation dialogue.
-                            Log.d(LOG_TAG, "User decided not to open bluetooth. Just continue.");
-                        }
-                    }
-            )
-            .create();
+        /**
+         * Google Play services can resolve some errors it detects.
+         * If the error has a resolution, try sending an Intent to
+         * start a Google Play services activity that can resolve
+         * error.
+         */
 
-        RomuDialogFragment fragment = new RomuDialogFragment();
-        fragment.setDialog(dialog);
-
-        fragment.show(fragmentManager, "bluetooth_comfirmation");
-    }
-
-    /**
-     * Make request to Google Direction API to get route from start address to
-     * destination address in another thread.
-     *
-     * start_addr, dest_addr and route are all class memebers, so no parameters
-     * are passed.
-     */
-    private void getRouteByRequestingGoogle()
-    {
-        new GetRoutes().execute();
-    }
-
-    private class GetRoutes extends AsyncTask<String, Void, Void>
-    {
-        @Override
-        protected void onPreExecute() {}
-
-        @Override
-        protected Void doInBackground(String... params)
-        {
-            currentRoute = directions(startAddr, destAddr);
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result)
-        {
-            // Draw route on the map.
-            PolylineOptions routePolylineOptions = new PolylineOptions();
-            routePolylineOptions.addAll(currentRoute.getPoints());
-            map.addPolyline(routePolylineOptions);
-
-            // Draw marker on origin and destination.
-            map.addMarker(new MarkerOptions()
-                    .position(currentRoute.getStartLocation())
-                    .title(currentRoute.getStartAddr())
-                    );
-            map.addMarker(new MarkerOptions()
-                    .position(currentRoute.getEndLocation())
-                    .title(currentRoute.getDestAddr())
-                    );
-
-            // Set camera to the route.
-            // TODO: adjust the padding when refining.
-            // TODO: add animation when moving camera.
-            map.moveCamera(CameraUpdateFactory.newLatLngBounds(currentRoute.getBounds(), 0));
-        }
-
-        private Route directions(String startAddr, String destAddr)
-        {
-            Route route = null;
-
-            // Construct http request to Google Direction API service.
-            String jsonURL = "http://maps.googleapis.com/maps/api/directions/json?";
-            StringBuilder sBuilder = new StringBuilder(jsonURL);
-            sBuilder.append("origin=");
-            sBuilder.append(startAddr);
-            sBuilder.append("&destination=");
-            sBuilder.append(destAddr);
-            sBuilder.append("&sensor=true&mode=walking&key" + Utilities.API_KEY);
-
-            String requestUrl = sBuilder.toString();
-            try {
-                final GoogleDirectionParser parser = new GoogleDirectionParser(requestUrl);
-                route = parser.parse();
-            } catch (MalformedURLException e) {
-                Log.e(LOG_TAG, "Error when parsing url.");
-            }
-            return route;
-        }
-
+        // if (connectionResult.hasResolution()) {
+            // try {
+                // // Start an Activity that tries to resolve the error
+                // connectionResult.startResolutionForResult(
+                        // this,
+                        // CONNECTION_FAILURE_RESOLUTION_REQUEST);
+                /**
+                 * Thrown if Google Play services canceled the original
+                 * PendingIntent
+                 */
+            // } catch (IntentSender.SendIntentException e) {
+                // // Log the error
+                // e.printStackTrace();
+            // }
+        // } else {
+            /**
+             * If no resolution is available, display a dialog to the
+             * user with the error.
+             */
+            // showErrorDialog(connectionResult.getErrorCode());
+        // }
     }
 }
