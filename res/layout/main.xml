@@ -15,7 +15,7 @@
     <LinearLayout
         android:layout_width    = "match_parent"
         android:layout_height   = "wrap_content"
-        android:layout_alignParentTop = "true"
+        android:layout_alignParentBottom = "true"
         >
         <EditText
             android:layout_width    = "0dp"
@@ -31,4 +31,12 @@
             android:onClick         = "onNavigate"
             />
     </LinearLayout>
+    <Button
+        android:layout_width    = "wrap_content"
+        android:layout_height   = "wrap_content"
+        android:text            = "@string/button_stop"
+        android:layout_alignParentLeft = "true"
+        android:onClick         = "onStopNavigation"
+            >
+    </Button>
 </RelativeLayout>
