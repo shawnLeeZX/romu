@@ -44,6 +44,11 @@
             </intent-filter>
         </activity>
 
+        <service
+            android:name        = "com.romu.app.RomuService"
+            android:enabled     = "true"
+            android:exported    = "false"/>
+
         <activity
             android:name    = "com.romu.app.LocationFetcherActivity"
             android:parentActivityName = "com.romu.app.MainActivity" >

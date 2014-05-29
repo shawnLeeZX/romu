@@ -44,10 +44,10 @@ package com.romu.app;
 import java.net.MalformedURLException;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.*;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.romu.app.RomuService.LocalBinder;
@@ -72,6 +72,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity
@@ -80,6 +81,7 @@ public class MainActivity extends Activity
 
     // UI.
     private FragmentManager fragmentManager = null;
+    private AutoCompleteTextView destAddrAutoCompleteTextView = null;
 
     // Requestion code for user interaction activities.
     private static final int FETCH_START_AND_DESTINATION_REQUEST    = 2;
@@ -93,7 +95,6 @@ public class MainActivity extends Activity
     private String startAddr = null;
     private String destAddr  = null;
     private Route currentRoute = null;
-    private Location currentLocation = null;
     private boolean isNavigationStopped = true;
 
     // Interaction with Romu service.
@@ -119,8 +120,10 @@ public class MainActivity extends Activity
             googleServicesAvailableInitially = true;
             setContentView(R.layout.main);
 
+            Log.d(LOG_TAG, "Romu service initializing.");
             initializeRomuService();
-            Log.d(LOG_TAG, "Romu service initialized.");
+
+            initNavigationUI();
 
             renderMap();
             Log.d(LOG_TAG, "Map render finishes.");
@@ -222,18 +225,26 @@ public class MainActivity extends Activity
         }
     }
 
+    private void initNavigationUI()
+    {
+        destAddrAutoCompleteTextView = (AutoCompleteTextView) findViewById(R.id.main_dest_addr);
+        destAddrAutoCompleteTextView.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.list_item));
+    }
+
     /**
      * Initial rendering of Google Map at app startup.
      */
     private void renderMap()
     {
         setUpMapIfNeeded();
+        // TODO: reimplement this button when refining.
         map.setMyLocationEnabled(true);
     }
 
     private void initializeRomuService()
     {
         Intent romuServiceIntent = new Intent(this, RomuService.class);
+        Log.d(LOG_TAG, "Starting Romu Service...");
         startService(romuServiceIntent);
         // Connection with Romu service for better interface.
         serviceConnection = new ServiceConnection()
@@ -241,6 +252,7 @@ public class MainActivity extends Activity
             @Override
             public void onServiceConnected(ComponentName componentName, IBinder service)
             {
+                Log.d(LOG_TAG, "Romu service connected.");
                 LocalBinder binder = (LocalBinder) service;
                 romuService = binder.getService();
             }
@@ -248,6 +260,7 @@ public class MainActivity extends Activity
             @Override
             public void onServiceDisconnected(ComponentName componentName)
             {
+                Log.d(LOG_TAG, "Romu service disconnected.");
                 romuService = null;
             }
         };
@@ -310,6 +323,7 @@ public class MainActivity extends Activity
         };
         registerReceiver(romuUpdateReciever, romuUpdateIntentFilter());
 
+        Log.d(LOG_TAG, "Binding romu service...");
         bindService(romuServiceIntent, serviceConnection, BIND_AUTO_CREATE);
 
 
@@ -320,6 +334,9 @@ public class MainActivity extends Activity
         unregisterReceiver(romuUpdateReciever);
         unbindService(serviceConnection);
         romuService = null;
+
+        Intent romuServiceIntent = new Intent(this, RomuService.class);
+        stopService(romuServiceIntent);
     }
 
     /**
@@ -380,8 +397,33 @@ public class MainActivity extends Activity
      */
     public void onNavigate(View view)
     {
+        // STOP
         Intent intent = new Intent(this, LocationFetcherActivity.class);
         startActivityForResult(intent, FETCH_START_AND_DESTINATION_REQUEST);
+    }
+
+    // TODO: this functions is reserved for navigation capable of choosing
+    // origin and destination. No button is associated with this yet.
+    public void onTwoPointRoute(View view)
+    {
+        Intent intent = new Intent(this, LocationFetcherActivity.class);
+        startActivityForResult(intent, FETCH_START_AND_DESTINATION_REQUEST);
+    }
+
+    /**
+     * Callback for Route button in the navigation bar, which will obtain and
+     * store relevant route information from Google and display the route
+     * visually on map.
+     */
+    public void onRoute(View view)
+    {
+        destAddr = destAddrAutoCompleteTextView.getText().toString();
+
+        // Replace space with %20.
+        destAddr = destAddr.replace(" ", "%20");
+
+        // Get current location's latitude and longitude.
+        getRouteByRequestingGoogle(true);
     }
 
     /**
@@ -403,9 +445,37 @@ public class MainActivity extends Activity
      * start_addr, dest_addr and route are all class memebers, so no parameters
      * are passed.
      */
-    private void getRouteByRequestingGoogle()
+    private void getRouteByRequestingGoogle(boolean useLatLng)
     {
-        new GetRoutes().execute();
+        if(useLatLng)
+        {
+            // If romu service is not ready, just return.
+            if(romuService == null)
+            {
+                Toast.makeText(this, "Romu Service not ready.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // If current location is unavailable, we just ignore.
+            LatLng currentLatLng = romuService.getCurrentLatLgn();
+            if(currentLatLng == null)
+                return;
+
+            // Else, keep going.
+            new GetRoutes(
+                    useLatLng,
+                    currentLatLng,
+                    destAddr
+                    ).execute();
+        }
+        else
+        {
+            new GetRoutes(
+                    useLatLng,
+                    startAddr,
+                    destAddr
+                    ).execute();
+        }
     }
 
     /**
@@ -413,13 +483,35 @@ public class MainActivity extends Activity
      */
     private class GetRoutes extends AsyncTask<String, Void, Void>
     {
+        private boolean useLatLng = false;
+        private String startAddr = null;
+        private String destAddr = null;
+        private LatLng startLatLng = null;
+
+        public GetRoutes(boolean useLatLng, String startAddr, String destAddr)
+        {
+            this.useLatLng = useLatLng;
+            this.startAddr = startAddr;
+            this.destAddr = destAddr;
+        }
+
+        public GetRoutes(boolean useLatLng, LatLng startLatLng, String destAddr)
+        {
+            this.useLatLng = useLatLng;
+            this.startLatLng = startLatLng;
+            this.destAddr = destAddr;
+        }
+
         @Override
         protected void onPreExecute() {}
 
         @Override
         protected Void doInBackground(String... params)
         {
-            currentRoute = directions(startAddr, destAddr);
+            if(useLatLng)
+                currentRoute = directions(startLatLng, destAddr);
+            else
+                currentRoute = directions(startAddr, destAddr);
 
             return null;
         }
@@ -454,7 +546,7 @@ public class MainActivity extends Activity
          * should be retrieved from Google to ensure its validity. Random
          * arbitrary address will raise error.
          *
-         * @param   startAddr   The origin of the route.
+         * @param   startAddr   The origin address of the route.
          * @param   destAddr    The detination address.
          *
          * @return  Route       A class encapsule all information from Google.
@@ -483,6 +575,50 @@ public class MainActivity extends Activity
             return route;
         }
 
+        /**
+         * Use latitude and longitude for start location. Other description
+         * please see {@link #directions(String startAddr, String destAddr)
+         * directions}.
+         */
+        private Route directions(LatLng startLatLng, String destAddr)
+        {
+            Route route = null;
+
+            // Construct http request to Google Direction API service.
+            String jsonURL = "http://maps.googleapis.com/maps/api/directions/json?";
+            StringBuilder sBuilder = new StringBuilder(jsonURL);
+            sBuilder.append("origin=");
+            sBuilder.append(startLatLng.latitude);
+            sBuilder.append(",");
+            sBuilder.append(startLatLng.longitude);
+            sBuilder.append("&destination=");
+            sBuilder.append(destAddr);
+            sBuilder.append("&sensor=true&mode=walking&key" + Utilities.API_KEY);
+
+            String requestUrl = sBuilder.toString();
+            return directionRequestToGoogle(requestUrl);
+        }
+
+        /**
+         * Make request to Google Direction Service
+         *
+         * @param   requestUrl  String of http request to Google Direction Service.
+         * 
+         * @return  Route       {@Route} Class encapsuled all information
+         *                      returned.
+         */
+        private Route directionRequestToGoogle(String requestUrl)
+        {
+            Route route = null;
+
+            try {
+                final GoogleDirectionParser parser = new GoogleDirectionParser(requestUrl);
+                route = parser.parse();
+            } catch (MalformedURLException e) {
+                Log.e(LOG_TAG, "Error when parsing url.");
+            }
+            return route;
+        }
     }
 
     // Communication with Romu service.
@@ -529,7 +665,7 @@ public class MainActivity extends Activity
                     destAddr     = bundle.getString(LocationFetcherActivity.DEST_ADDR_STRING);
                     Log.d(LOG_TAG, "Destination fetched: " + destAddr);
 
-                    getRouteByRequestingGoogle();
+                    getRouteByRequestingGoogle(false);
 
                     break;
                 }

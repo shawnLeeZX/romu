@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">Romu</string>
 
-    <!-- For MainActivity-->
+    <!-- For Navigation. -->
     <!-- ========================================================= -->
     <string name="action_search">Search</string>
     <string name="action_settings">Settings</string>
@@ -10,10 +10,14 @@
 
     <!-- Pre Navigation Bar -->
     <string name="button_navigate">Navigate</string>
-    <string name="destination_hint">Destination</string>
 
     <!-- In Navigation Bar -->
+    <string name="button_route">Route</string>
     <string name="button_stop">Stop</string>
+
+    <string name="start_addr">Start Address</string>
+    <string name="dest_addr">Destination</string>
+    <string name="button_ok">OK</string>
     <!-- ========================================================= -->
 
 
@@ -27,11 +31,5 @@
     <string name="prompt_dialog_cancel">Cancel</string>
     <string name="prompt_dialog_quit">Quit</string>
 
-    <!-- For LocationFetchActivity. -->
-    <!-- ========================================================= -->
-    <string name="start_addr">Start Address</string>
-    <string name="dest_addr">Destination</string>
-    <string name="button_ok">OK</string>
-    <!-- ========================================================= -->
 
 </resources>
