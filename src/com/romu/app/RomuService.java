@@ -9,12 +9,16 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.model.LatLng;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -26,6 +30,9 @@ import android.widget.Toast;
  * service and firmware(wearable). It handles the connection between the app and
  * Google Play Service, using network, the app and the firmware using bluetooth
  * low energy(Bluetooth Gatt). Google Play Services provides location service.
+ *
+ * Also, it provides inferfaces to application binded to it to start and stop
+ * relevant service.
  */
 public class RomuService extends Service implements
     ConnectionCallbacks,
@@ -48,6 +55,9 @@ public class RomuService extends Service implements
     // Binder given to clients.
     private final IBinder binder = new LocalBinder();
 
+    // Romu service related.
+    private static final int FOREGROUND_ID = 1337;
+
     @Override
     public void onCreate()
     {
@@ -55,11 +65,18 @@ public class RomuService extends Service implements
 
         // TODO: set up bluetooth service.
 
+        makeForegroundService();
         initializeLocationService();
     }
 
     // Private methods.
     // ================================================================================
+    private void makeForegroundService()
+    {
+        Notification notification = makeNotification();
+        notification.flags |= Notification.FLAG_NO_CLEAR;
+        startForeground(FOREGROUND_ID, notification);
+    }
     private void initializeLocationService()
     {
         locationRequest = LocationRequest.create();
@@ -70,6 +87,31 @@ public class RomuService extends Service implements
         Log.d(LOG_TAG, "Location service initialized.");
     }
 
+    /**
+     * Notification for foreground service. If it is clicked then we open up
+     * into the main activity
+     */
+
+    private Notification makeNotification()
+    {
+        // TODO: Display the text instruction on notification.
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pendIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+        NotificationCompat.Builder notification = new NotificationCompat.Builder(this);
+        notification.setContentTitle("Romu");
+        notification.setSmallIcon(R.drawable.romuwhite);
+        notification.setWhen(System.currentTimeMillis());
+        notification.setContentText("Romu");
+        notification.setTicker("Romu");
+        notification.setOngoing(true);
+        notification.setPriority(Notification.PRIORITY_HIGH);
+        notification.setAutoCancel(false);
+        notification.setContentIntent(pendIntent);
+
+        return notification.build();
+    }
     // Service related.
     // ================================================================================
 
