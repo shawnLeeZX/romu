@@ -56,6 +56,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.FragmentManager;
+import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -84,6 +85,7 @@ public class MainActivity extends Activity
     private AutoCompleteTextView destAddrAutoCompleteTextView = null;
 
     // Requestion code for user interaction activities.
+    private static final int ENABLE_BT_REQUEST = 0;
     private static final int FETCH_START_AND_DESTINATION_REQUEST    = 2;
     private static final int CONNECTION_FAILURE_RESOLUTION_REQUEST  = 3;
 
@@ -102,6 +104,9 @@ public class MainActivity extends Activity
     private ServiceConnection serviceConnection = null; 
     private RomuService romuService = null;
 
+    // Bluetooth related.
+    private boolean bluetoothEnabled = false;
+
     // Life Cycle
     // =====================================================================
 
@@ -115,6 +120,7 @@ public class MainActivity extends Activity
 
         fragmentManager = getFragmentManager();
 
+        // If Google Play Service is not available, the app will just quit.
         if(isGooglePlayServiceAvailable())
         {
             googleServicesAvailableInitially = true;
@@ -127,6 +133,8 @@ public class MainActivity extends Activity
 
             renderMap();
             Log.d(LOG_TAG, "Map render finishes.");
+
+            enableBluetooth();
 
             Log.d(LOG_TAG, "MainActivity initialized.");
         }
@@ -387,6 +395,53 @@ public class MainActivity extends Activity
             return false;
         }
     }
+
+    private void enableBluetooth()
+    {
+        // If bluetooth is enabled or in progress of being enabled, since it is
+        // asynchronous, do nothing.
+        if(!bluetoothEnabled)
+        {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, ENABLE_BT_REQUEST);
+        }
+    }
+
+    /**
+     * Double confirmation that the user should enable bluetooth using dialog.
+     */
+    private void showBluetoothConfirmDialog()
+    {
+        // Create an dialog and pass it to ConfirmationDialogFragment to render.
+        Dialog dialog = new AlertDialog.Builder(this)
+            .setTitle(R.string.bluetooth_prompt)
+            .setPositiveButton(R.string.prompt_dialog_ok,
+                    new DialogInterface.OnClickListener()
+                    {
+                        public void onClick(DialogInterface dialog, int whichButton)
+                        {
+                            enableBluetooth();
+                        }
+                    }
+            )
+            .setNegativeButton(R.string.prompt_dialog_cancel,
+                    new DialogInterface.OnClickListener()
+                    {
+                        public void onClick(DialogInterface dialog, int whichButton)
+                        {
+                            // Does nothing but quit the confirmation dialogue.
+                            Log.d(LOG_TAG, "User decided not to open bluetooth. Just continue.");
+                        }
+                    }
+            )
+            .create();
+
+        RomuDialogFragment fragment = new RomuDialogFragment();
+        fragment.setDialog(dialog);
+
+        fragment.show(fragmentManager, "bluetooth_comfirmation");
+    }
+
 
     // Naptic Navigation Related.
     // =================================================================================
@@ -693,6 +748,17 @@ public class MainActivity extends Activity
                     fragment.setDialog(dialog);
 
                     fragment.show(fragmentManager, "google_play_service_prompt");
+                    break;
+                }
+            case ENABLE_BT_REQUEST:
+                {
+                    Log.d(LOG_TAG, "User cancelled enable bluetooth dialog. Confirming.");
+
+                    if(resultCode == RESULT_OK)
+                        bluetoothEnabled = true;
+                    else
+                        showBluetoothConfirmDialog();
+
                     break;
                 }
             default:
