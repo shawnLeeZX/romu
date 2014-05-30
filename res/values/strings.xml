@@ -21,7 +21,6 @@
 
     <!-- For User Info. -->
     <!-- ========================================================= -->
-    <string name="is_first_time_usage">com.romu.app.first_time</string>
     <string name="mac_address_prompt">Please Input The Number of Your Romu:</string>
     <string name="mac_address_button">OK</string>
     <string name="user_info_file_key">com.romu.app.wearable_mac_addr_file</string>

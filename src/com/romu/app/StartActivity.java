@@ -43,16 +43,17 @@ public class StartActivity extends Activity
                     );
 
             // If user preference exists we continue to RomuActivity.
-            boolean isFirstTime = sharedPref.getBoolean(
-                    getString(R.string.is_first_time_usage),
-                    true
+            String macAddr = sharedPref.getString(
+                    getString(R.string.mac_address),
+                    null
                     );
-            if(!isFirstTime)
+            if(macAddr != null)
             {
                 Log.i(LOG_TAG, "Romu is not running for the first time." + "\n"
                         + "Skip welcome and info page.");
                 Intent intent = new Intent(this, RomuActivity.class);
                 startActivity(intent);
+                finish();
             }
             // Otherwise show more time of welcome page and get user info using
             // GetInfoActivity.
@@ -61,13 +62,6 @@ public class StartActivity extends Activity
                 setContentView(R.layout.welcome);
 
                 Log.i(LOG_TAG, "Romu is running for the first time.");
-                // Set first time usage flag to false.
-                editor = sharedPref.edit();
-                editor.putBoolean(
-                        getString(R.string.is_first_time_usage),
-                        false
-                        );
-                editor.commit();
 
                 new Handler().postDelayed(new Runnable()
                         {
@@ -76,10 +70,10 @@ public class StartActivity extends Activity
                             {
                                 Intent intent = new Intent(StartActivity.this, GetInfoActivity.class);
                                 startActivity(intent);
+                                StartActivity.this.finish();
                             }
-                        }, 1000);
+                        }, 3000);
             }
-            finish();
         }
         else
             finish();

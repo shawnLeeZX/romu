@@ -63,4 +63,9 @@ public class GetInfoActivity extends Activity
         finish();
     }
 
+    @Override
+    public void onBackPressed()
+    {
+        finish();
+    }
 }

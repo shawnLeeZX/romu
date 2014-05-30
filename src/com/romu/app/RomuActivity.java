@@ -159,12 +159,14 @@ public class RomuActivity extends Activity
      * Called when the Activity is no longer visible.
      */
     @Override
-    protected void onStop()
+    protected void onPause()
     {
         // If Romu is not in the navigation model, disable location service
         // for saving battery.
         if(isNavigationStopped)
         {
+            Log.i(LOG_TAG,
+                    "Temporarily disable location service since romu is not visible and not navigating.");
             if(romuService != null)
             {
                 romuService.stopLocationService();
@@ -387,6 +389,7 @@ public class RomuActivity extends Activity
         else
         {
             romuService.startNavigation(currentRoute);
+            isNavigationStopped = false;
         }
     }
 

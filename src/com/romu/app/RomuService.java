@@ -69,11 +69,14 @@ public class RomuService extends Service implements
     private ServiceConnection serviceConnection;
     private BluetoothLEService btService;
     private BroadcastReceiver btUpdateReciever;
+    private boolean btServiceConnected;
 
     @Override
     public void onCreate()
     {
         Log.d(LOG_TAG, "Creating Romu Services...");
+
+        btServiceConnected = false;
 
         broadcastManager = LocalBroadcastManager.getInstance(this);
         makeForegroundService();
@@ -168,6 +171,7 @@ public class RomuService extends Service implements
         Log.d(LOG_TAG, "Romu service is going to be destroyed.");
 
         stopLocationService();
+        stopBluetoothService();
 
         Log.d(LOG_TAG, "Romu service destroyed.");
     }
@@ -227,52 +231,61 @@ public class RomuService extends Service implements
     // =================================================================================
     private void startBluetoothSevice()
     {
-        Intent btServiceIntent = new Intent(this, BluetoothLEService.class);
-        Log.d(LOG_TAG, "Starting Bluetooth Service...");
-        startService(btServiceIntent);
-        // Connection with BT service for better interface.
-        serviceConnection = new ServiceConnection()
+        if(!btServiceConnected)
         {
-            @Override
-            public void onServiceConnected(ComponentName componentName, IBinder service)
+            Intent btServiceIntent = new Intent(this, BluetoothLEService.class);
+            Log.d(LOG_TAG, "Starting Bluetooth Service...");
+            startService(btServiceIntent);
+            // Connection with BT service for better interface.
+            serviceConnection = new ServiceConnection()
             {
-                Log.d(LOG_TAG, "Bluetooth service connected.");
-                BluetoothLEService.LocalBinder binder = (BluetoothLEService.LocalBinder) service;
-                btService = binder.getService();
-            }
+                @Override
+                public void onServiceConnected(ComponentName componentName, IBinder service)
+                {
+                    Log.d(LOG_TAG, "Bluetooth service connected.");
+                    BluetoothLEService.LocalBinder binder = (BluetoothLEService.LocalBinder) service;
+                    btService = binder.getService();
+                }
 
-            @Override
-            public void onServiceDisconnected(ComponentName componentName)
+                @Override
+                public void onServiceDisconnected(ComponentName componentName)
+                {
+                    Log.d(LOG_TAG, "Bluetooth service disconnected.");
+                    btService = null;
+                }
+            };
+
+            // BroadcastReceiver to receive updates broadcast from Romu service.
+            btUpdateReciever = new BroadcastReceiver()
             {
-                Log.d(LOG_TAG, "Bluetooth service disconnected.");
-                btService = null;
-            }
-        };
+                @Override
+                public void onReceive(Context context, Intent intent)
+                {
+                    final String action = intent.getAction();
+                    // TODO: receive broadcast from Bluetooth service.
+                }
+            };
+            broadcastManager.registerReceiver(btUpdateReciever, btUpdateIntentFilter());
 
-        // BroadcastReceiver to receive updates broadcast from Romu service.
-        btUpdateReciever = new BroadcastReceiver()
-        {
-            @Override
-            public void onReceive(Context context, Intent intent)
-            {
-                final String action = intent.getAction();
-                // TODO: receive broadcast from Bluetooth service.
-            }
-        };
-        broadcastManager.registerReceiver(btUpdateReciever, btUpdateIntentFilter());
+            Log.d(LOG_TAG, "Binding BluetoothLE service...");
+            bindService(btServiceIntent, serviceConnection, BIND_AUTO_CREATE);
 
-        Log.d(LOG_TAG, "Binding BluetoothLE service...");
-        bindService(btServiceIntent, serviceConnection, BIND_AUTO_CREATE);
+            btServiceConnected = true;
+        }
     }
 
     private void stopBluetoothService()
     {
-        broadcastManager.unregisterReceiver(btUpdateReciever);
-        unbindService(serviceConnection);
-        btService = null;
+        if(btServiceConnected)
+        {
+            broadcastManager.unregisterReceiver(btUpdateReciever);
+            unbindService(serviceConnection);
+            btService = null;
 
-        Intent btServiceIntent = new Intent(this, BluetoothLEService.class);
-        stopService(btServiceIntent);
+            Intent btServiceIntent = new Intent(this, BluetoothLEService.class);
+            stopService(btServiceIntent);
+            btServiceConnected = false;
+        }
     }
 
     private static IntentFilter btUpdateIntentFilter()
