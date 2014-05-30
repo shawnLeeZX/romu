@@ -56,7 +56,7 @@ public class GetInfoActivity extends Activity
                 macAddr
                 );
         editor.commit();
-        Log.d(LOG_TAG, "MAC Address Saved: " + macAddr + ".");
+        Log.i(LOG_TAG, "MAC Address Saved: " + macAddr + ".");
 
         Intent intent = new Intent(this, RomuActivity.class);
         startActivity(intent);

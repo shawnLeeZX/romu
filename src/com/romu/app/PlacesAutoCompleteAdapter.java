@@ -122,7 +122,7 @@ public class PlacesAutoCompleteAdapter extends ArrayAdapter<String> implements F
             String autocompleteResponceStatus = jsonObj.getString("status");
             if(!autocompleteResponceStatus.equals("OK"))
             {
-                Log.d(LOG_TAG, "Place API malfunctioning. Responce status is: " 
+                Log.i(LOG_TAG, "Place API malfunctioning. Responce status is: " 
                         + autocompleteResponceStatus
                         + "\n"
                         + "Error message: " + jsonObj.getString("error_message"));

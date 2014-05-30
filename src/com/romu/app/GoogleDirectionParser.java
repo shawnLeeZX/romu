@@ -90,7 +90,7 @@ public class GoogleDirectionParser
             final String status = json.getString("status");
             if(!status.equals("OK"))
             {
-                Log.d(LOG_TAG, "The response status of Google Direction API is not OK.");
+                Log.i(LOG_TAG, "The response status of Google Direction API is not OK.");
                 return null;
             }
 

@@ -117,18 +117,18 @@ public class RomuActivity extends Activity
 
         setContentView(R.layout.main);
 
-        Log.d(LOG_TAG, "Romu service initializing.");
+        Log.i(LOG_TAG, "Romu service initializing.");
         initializeRomuService();
 
         initNavigationUI();
 
         renderMap();
-        Log.d(LOG_TAG, "Map render finishes.");
+        Log.i(LOG_TAG, "Map render finishes.");
 
         // TODO: move this enable when navigation begins.
         enableBluetooth();
 
-        Log.d(LOG_TAG, "MainActivity initialized.");
+        Log.i(LOG_TAG, "MainActivity initialized.");
 
     }
 
@@ -204,12 +204,12 @@ public class RomuActivity extends Activity
             // Otherwise functions concerning map may not work.
             if(map == null)
             {
-                Log.d(LOG_TAG, "Failed to instantiate google map");
+                Log.i(LOG_TAG, "Failed to instantiate google map");
                 // TODO: Give prompt to let user fix the problem to let the map
                 // running. For instance, enable network.
             }
             else
-                Log.d(LOG_TAG, "Successfully instantiate google map.");
+                Log.i(LOG_TAG, "Successfully instantiate google map.");
         }
     }
 
@@ -232,7 +232,7 @@ public class RomuActivity extends Activity
     private void initializeRomuService()
     {
         Intent romuServiceIntent = new Intent(this, RomuService.class);
-        Log.d(LOG_TAG, "Starting Romu Service...");
+        Log.i(LOG_TAG, "Starting Romu Service...");
         startService(romuServiceIntent);
         // Connection with Romu service for better interface.
         serviceConnection = new ServiceConnection()
@@ -240,7 +240,7 @@ public class RomuActivity extends Activity
             @Override
             public void onServiceConnected(ComponentName componentName, IBinder service)
             {
-                Log.d(LOG_TAG, "Romu service connected.");
+                Log.i(LOG_TAG, "Romu service connected.");
                 RomuService.LocalBinder binder = (RomuService.LocalBinder) service;
                 romuService = binder.getService();
             }
@@ -248,7 +248,7 @@ public class RomuActivity extends Activity
             @Override
             public void onServiceDisconnected(ComponentName componentName)
             {
-                Log.d(LOG_TAG, "Romu service disconnected.");
+                Log.i(LOG_TAG, "Romu service disconnected.");
                 romuService = null;
             }
         };
@@ -311,7 +311,7 @@ public class RomuActivity extends Activity
         };
         registerReceiver(romuUpdateReciever, romuUpdateIntentFilter());
 
-        Log.d(LOG_TAG, "Binding romu service...");
+        Log.i(LOG_TAG, "Binding romu service...");
         bindService(romuServiceIntent, serviceConnection, BIND_AUTO_CREATE);
 
 
@@ -361,7 +361,7 @@ public class RomuActivity extends Activity
                         public void onClick(DialogInterface dialog, int whichButton)
                         {
                             // Does nothing but quit the confirmation dialogue.
-                            Log.d(LOG_TAG, "User decided not to open bluetooth. Just continue.");
+                            Log.i(LOG_TAG, "User decided not to open bluetooth. Just continue.");
                         }
                     }
             )
@@ -646,19 +646,19 @@ public class RomuActivity extends Activity
             case FETCH_START_AND_DESTINATION_REQUEST:
                 {
                     // Fetch the start location and destination from user input.
-                    Log.d(LOG_TAG, "Location fetcher returned.");
+                    Log.i(LOG_TAG, "Location fetcher returned.");
                     if(resultCode != RESULT_OK)
                     {
-                        Log.d(LOG_TAG, "There is something wrong with location fetcher.");
+                        Log.i(LOG_TAG, "There is something wrong with location fetcher.");
                         // TODO: code the error handler.
                         break;
                     }
-                    Log.d(LOG_TAG, "Location fetcher finished successfully.");
+                    Log.i(LOG_TAG, "Location fetcher finished successfully.");
                     Bundle bundle   = data.getExtras();
                     startAddr    = bundle.getString(LocationFetcherActivity.START_ADDR_STRING);
-                    Log.d(LOG_TAG, "Start location fetched: " + startAddr);
+                    Log.i(LOG_TAG, "Start location fetched: " + startAddr);
                     destAddr     = bundle.getString(LocationFetcherActivity.DEST_ADDR_STRING);
-                    Log.d(LOG_TAG, "Destination fetched: " + destAddr);
+                    Log.i(LOG_TAG, "Destination fetched: " + destAddr);
 
                     getRouteByRequestingGoogle(false);
 
@@ -666,7 +666,7 @@ public class RomuActivity extends Activity
                 }
             case ENABLE_BT_REQUEST:
                 {
-                    Log.d(LOG_TAG, "User cancelled enable bluetooth dialog. Confirming.");
+                    Log.i(LOG_TAG, "User cancelled enable bluetooth dialog. Confirming.");
 
                     if(resultCode == RESULT_OK)
                         bluetoothEnabled = true;

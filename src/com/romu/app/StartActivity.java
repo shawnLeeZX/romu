@@ -130,7 +130,7 @@ public class StartActivity extends Activity
         if (ConnectionResult.SUCCESS == resultCode)
         {
             // In debug mode, log the status
-            Log.d("Location Updates",
+            Log.i("Location Updates",
                     "Google Play services is available.");
             // Continue
             return true;

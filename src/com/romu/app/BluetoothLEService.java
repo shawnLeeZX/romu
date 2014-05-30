@@ -78,7 +78,7 @@ public class BluetoothLEService extends Service
     @Override
     public void onCreate()
     {
-        Log.d(LOG_TAG, "Creating BluetoothLE Services...");
+        Log.i(LOG_TAG, "Creating BluetoothLE Services...");
 
         broadcastManager = LocalBroadcastManager.getInstance(this);
         initializeBluetooth();
@@ -100,7 +100,7 @@ public class BluetoothLEService extends Service
                 getString(R.string.mac_address),
                 null
                 );
-        Log.d(LOG_TAG, "Mac Address Read: " + macAddress + ".");
+        Log.i(LOG_TAG, "Mac Address Read: " + macAddress + ".");
 
         connectionState = STATE_DISCONNECTED;
 
@@ -210,7 +210,7 @@ public class BluetoothLEService extends Service
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-        Log.d("BluetoothLE Service", "Received start id " + startId + ": " + intent);
+        Log.i("BluetoothLE Service", "Received start id " + startId + ": " + intent);
 
         // TODO: change hard coded address to reading from prefer.
         connect("20:CD:39:9E:F1:40");
@@ -223,10 +223,10 @@ public class BluetoothLEService extends Service
     @Override
     public void onDestroy()
     {
-        Log.d(LOG_TAG, "BluetoothLE service is going to be destroyed.");
+        Log.i(LOG_TAG, "BluetoothLE service is going to be destroyed.");
 
 
-        Log.d(LOG_TAG, "BluetoothLE service destroyed.");
+        Log.i(LOG_TAG, "BluetoothLE service destroyed.");
     }
 
     // Bluetooth related.
@@ -261,7 +261,7 @@ public class BluetoothLEService extends Service
                 && bluetoothGatt != null
                 )
         {
-            Log.d(LOG_TAG, "Trying to use an existing bluetoothGatt for connection.");
+            Log.i(LOG_TAG, "Trying to use an existing bluetoothGatt for connection.");
             if (bluetoothGatt.connect())
             {
                 connectionState = STATE_CONNECTING;
@@ -280,7 +280,7 @@ public class BluetoothLEService extends Service
         // We want to directly connect to the device, so we are setting the
         // autoConnect parameter to false.
         bluetoothGatt = device.connectGatt(this, false, gattCallback);
-        Log.d(LOG_TAG, "Trying to create a new connection.");
+        Log.i(LOG_TAG, "Trying to create a new connection.");
         macAddress = address;
         connectionState = STATE_CONNECTING;
         return true;

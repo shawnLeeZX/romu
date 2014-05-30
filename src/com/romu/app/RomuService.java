@@ -74,7 +74,7 @@ public class RomuService extends Service implements
     @Override
     public void onCreate()
     {
-        Log.d(LOG_TAG, "Creating Romu Services...");
+        Log.i(LOG_TAG, "Creating Romu Services...");
 
         btServiceConnected = false;
 
@@ -98,7 +98,7 @@ public class RomuService extends Service implements
         locationRequest.setInterval(locationUpdateInterval);
 
         locationClient = new LocationClient(this, this, this);
-        Log.d(LOG_TAG, "Location service initialized.");
+        Log.i(LOG_TAG, "Location service initialized.");
     }
 
     /**
@@ -158,7 +158,7 @@ public class RomuService extends Service implements
     @Override
     public int onStartCommand(Intent intent, int flags, int startId)
     {
-        Log.d("Romu Service", "Received start id " + startId + ": " + intent);
+        Log.i("Romu Service", "Received start id " + startId + ": " + intent);
         startLocationService();
         // Keeps OS from shutting down service when activity has changed state
         return START_STICKY;
@@ -168,12 +168,12 @@ public class RomuService extends Service implements
     @Override
     public void onDestroy()
     {
-        Log.d(LOG_TAG, "Romu service is going to be destroyed.");
+        Log.i(LOG_TAG, "Romu service is going to be destroyed.");
 
         stopLocationService();
         stopBluetoothService();
 
-        Log.d(LOG_TAG, "Romu service destroyed.");
+        Log.i(LOG_TAG, "Romu service destroyed.");
     }
 
     // Interfaces.
@@ -182,7 +182,7 @@ public class RomuService extends Service implements
     {
         if(!locationServiceConnected)
         {
-            Log.d(LOG_TAG, "Starting location service...");
+            Log.i(LOG_TAG, "Starting location service...");
             locationClient.connect();
         }
     }
@@ -191,7 +191,7 @@ public class RomuService extends Service implements
     {
         if(locationServiceConnected)
         {
-            Log.d(LOG_TAG, "Stopping location service...");
+            Log.i(LOG_TAG, "Stopping location service...");
             locationClient.removeLocationUpdates(this);
             locationClient.disconnect();
             locationServiceConnected = false;
@@ -234,7 +234,7 @@ public class RomuService extends Service implements
         if(!btServiceConnected)
         {
             Intent btServiceIntent = new Intent(this, BluetoothLEService.class);
-            Log.d(LOG_TAG, "Starting Bluetooth Service...");
+            Log.i(LOG_TAG, "Starting Bluetooth Service...");
             startService(btServiceIntent);
             // Connection with BT service for better interface.
             serviceConnection = new ServiceConnection()
@@ -242,7 +242,7 @@ public class RomuService extends Service implements
                 @Override
                 public void onServiceConnected(ComponentName componentName, IBinder service)
                 {
-                    Log.d(LOG_TAG, "Bluetooth service connected.");
+                    Log.i(LOG_TAG, "Bluetooth service connected.");
                     BluetoothLEService.LocalBinder binder = (BluetoothLEService.LocalBinder) service;
                     btService = binder.getService();
                 }
@@ -250,7 +250,7 @@ public class RomuService extends Service implements
                 @Override
                 public void onServiceDisconnected(ComponentName componentName)
                 {
-                    Log.d(LOG_TAG, "Bluetooth service disconnected.");
+                    Log.i(LOG_TAG, "Bluetooth service disconnected.");
                     btService = null;
                 }
             };
@@ -267,7 +267,7 @@ public class RomuService extends Service implements
             };
             broadcastManager.registerReceiver(btUpdateReciever, btUpdateIntentFilter());
 
-            Log.d(LOG_TAG, "Binding BluetoothLE service...");
+            Log.i(LOG_TAG, "Binding BluetoothLE service...");
             bindService(btServiceIntent, serviceConnection, BIND_AUTO_CREATE);
 
             btServiceConnected = true;
@@ -327,7 +327,7 @@ public class RomuService extends Service implements
     public void onDisconnected()
     {
         // Display the connection status
-        Log.d(LOG_TAG, "Location service disconnnected.");
+        Log.i(LOG_TAG, "Location service disconnnected.");
         Toast.makeText(this, "Location Serice Disconnected. Please re-connect.",
                 Toast.LENGTH_SHORT).show();
         locationServiceConnected = false;

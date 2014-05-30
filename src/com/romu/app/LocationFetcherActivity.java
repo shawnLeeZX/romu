@@ -29,7 +29,7 @@ public class LocationFetcherActivity extends Activity
 
     protected void onCreate(Bundle savedInstanceState)
     {
-        Log.d(LOG_TAG, "Entering Location fetcher.");
+        Log.i(LOG_TAG, "Entering Location fetcher.");
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.address_fetcher);
