@@ -106,7 +106,7 @@ public class RomuService extends Service implements
     private Notification makeNotification()
     {
         // TODO: Display the text instruction on notification.
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, RomuActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pendIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
@@ -300,7 +300,7 @@ public class RomuService extends Service implements
     public void onConnected(Bundle dataBundle)
     {
         // Display the connection status
-        Toast.makeText(this, "Connected", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Location Service Connected", Toast.LENGTH_SHORT).show();
         locationServiceConnected = true;
 
         currentLocation = locationClient.getLastLocation();

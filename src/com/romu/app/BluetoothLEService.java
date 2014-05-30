@@ -93,11 +93,11 @@ public class BluetoothLEService extends Service
 
         // Read the MAC address of bluetooth.
         sharedPref = getSharedPreferences(
-                getString(R.string.mac_address_file_key),
+                getString(R.string.user_info_file_key),
                 Context.MODE_PRIVATE
                 );
         macAddress = sharedPref.getString(
-                getString(R.string.mac_address_file_key),
+                getString(R.string.mac_address),
                 null
                 );
         Log.d(LOG_TAG, "Mac Address Read: " + macAddress + ".");

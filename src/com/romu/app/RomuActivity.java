@@ -43,14 +43,11 @@ package com.romu.app;
 
 import java.net.MalformedURLException;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.*;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.romu.app.RomuService.LocalBinder;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -64,7 +61,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -76,9 +72,9 @@ import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
 
-public class MainActivity extends Activity
+public class RomuActivity extends Activity
 {
-    public static final String LOG_TAG = "Romu: MainActivity";
+    public static final String LOG_TAG = "Romu: RomuActivity";
 
     // UI.
     private FragmentManager fragmentManager = null;
@@ -87,17 +83,15 @@ public class MainActivity extends Activity
     // Requestion code for user interaction activities.
     private static final int ENABLE_BT_REQUEST = 0;
     private static final int FETCH_START_AND_DESTINATION_REQUEST    = 2;
-    private static final int CONNECTION_FAILURE_RESOLUTION_REQUEST  = 3;
 
     // Necessity class for Google services.
     private GoogleMap map = null;
-    private boolean googleServicesAvailableInitially = false;
 
     // Global naviation info.
     private String startAddr = null;
     private String destAddr  = null;
     private Route currentRoute = null;
-    private boolean isNavigationStopped = true;
+    private boolean isNavigationStopped;
 
     // Interaction with Romu service.
     private BroadcastReceiver romuUpdateReciever = null;
@@ -119,31 +113,23 @@ public class MainActivity extends Activity
         super.onCreate(savedInstanceState);
 
         fragmentManager = getFragmentManager();
+        isNavigationStopped = true;
 
-        // If Google Play Service is not available, the app will just quit.
-        if(isGooglePlayServiceAvailable())
-        {
-            googleServicesAvailableInitially = true;
-            setContentView(R.layout.main);
+        setContentView(R.layout.main);
 
-            Log.d(LOG_TAG, "Romu service initializing.");
-            initializeRomuService();
+        Log.d(LOG_TAG, "Romu service initializing.");
+        initializeRomuService();
 
-            initNavigationUI();
+        initNavigationUI();
 
-            renderMap();
-            Log.d(LOG_TAG, "Map render finishes.");
+        renderMap();
+        Log.d(LOG_TAG, "Map render finishes.");
 
-            // TODO: move this enable when navigation begins.
-            enableBluetooth();
+        // TODO: move this enable when navigation begins.
+        enableBluetooth();
 
-            Log.d(LOG_TAG, "MainActivity initialized.");
-        }
-        else
-        {
-            googleServicesAvailableInitially = false;
-            setContentView(R.layout.empty);
-        }
+        Log.d(LOG_TAG, "MainActivity initialized.");
+
     }
 
     @Override
@@ -160,17 +146,13 @@ public class MainActivity extends Activity
     {
         super.onStart();
 
-        // Check the availability of Google Play Service.
-        if(googleServicesAvailableInitially)
+        if(romuService != null)
         {
-            if(romuService != null)
-            {
-                romuService.startLocationService();
-            }
-
-            // Set up map object if it is destroyed.
-            setUpMapIfNeeded();
+            romuService.startLocationService();
         }
+
+        // Set up map object if it is destroyed.
+        setUpMapIfNeeded();
     }
 
     /**
@@ -179,16 +161,13 @@ public class MainActivity extends Activity
     @Override
     protected void onStop()
     {
-        if(googleServicesAvailableInitially)
+        // If Romu is not in the navigation model, disable location service
+        // for saving battery.
+        if(isNavigationStopped)
         {
-            // If Romu is not in the navigation model, disable location service
-            // for saving battery.
-            if(isNavigationStopped)
+            if(romuService != null)
             {
-                if(romuService != null)
-                {
-                    romuService.stopLocationService();
-                }
+                romuService.stopLocationService();
             }
         }
         super.onStop();
@@ -200,10 +179,8 @@ public class MainActivity extends Activity
     @Override
     protected void onDestroy()
     {
-        if(googleServicesAvailableInitially)
-        {
-            stopRomuService();
-        }
+        Log.i(LOG_TAG, "Romu quited.");
+        stopRomuService();
         super.onDestroy();
     }
 
@@ -346,55 +323,6 @@ public class MainActivity extends Activity
 
         Intent romuServiceIntent = new Intent(this, RomuService.class);
         stopService(romuServiceIntent);
-    }
-
-    /**
-     * Check and handle the availability of Google Play Service, which is
-     * essential for LocationService provided by android. If the service is not
-     * available, it will prompt user to install or update it.
-     */
-    private boolean isGooglePlayServiceAvailable()
-    {
-        // Check that Google Play services is available
-        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-        // If Google Play services is available
-        if (ConnectionResult.SUCCESS == resultCode)
-        {
-            // In debug mode, log the status
-            Log.d("Location Updates",
-                    "Google Play services is available.");
-            // Continue
-            return true;
-        }
-        // Google Play services was not available for some reason
-        else
-        {
-            // Get the error code
-            int errorCode = resultCode;
-            // Get the error dialog from Google Play services
-            Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(
-                    errorCode,
-                    this,
-                    CONNECTION_FAILURE_RESOLUTION_REQUEST);
-
-            // If Google Play services can provide an error dialog
-            if (errorDialog != null)
-            {
-                // Create a new DialogFragment for the error dialog
-                RomuDialogFragment errorFragment =
-                        new RomuDialogFragment();
-                // Set the dialog in the DialogFragment
-                errorFragment.setDialog(errorDialog);
-                // Show the error dialog in the DialogFragment
-                errorFragment.show(fragmentManager,
-                        "Wrong with Google Play Service");
-            }
-
-            // No matter whether the error has been resolved by Google Play
-            // Service or not, as long as Google Play Service is not detected in
-            // the first time, the method will return false.
-            return false;
-        }
     }
 
     private void enableBluetooth()
@@ -731,32 +659,6 @@ public class MainActivity extends Activity
 
                     getRouteByRequestingGoogle(false);
 
-                    break;
-                }
-            case CONNECTION_FAILURE_RESOLUTION_REQUEST:
-                {
-                    // If google play service resolves the problem, do nothing.
-                    if(resultCode == RESULT_OK)
-                        break;
-                    // If not, Show the dialog to inform user google play
-                    // service must be present to use the app and quit.
-                    Dialog dialog = new AlertDialog.Builder(this)
-                        .setTitle(R.string.googleplay_service_prompt)
-                        .setPositiveButton(R.string.prompt_dialog_quit,
-                                new DialogInterface.OnClickListener()
-                                {
-                                    public void onClick(DialogInterface dialog, int whichButton)
-                                    {
-                                        finish();
-                                    }
-                                }
-                        )
-                        .create();
-
-                    RomuDialogFragment fragment = new RomuDialogFragment();
-                    fragment.setDialog(dialog);
-
-                    fragment.show(fragmentManager, "google_play_service_prompt");
                     break;
                 }
             case ENABLE_BT_REQUEST:
