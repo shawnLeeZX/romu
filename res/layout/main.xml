@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Currently the main interface is a map with a button at the bottom of the
-  interface.-->
 <RelativeLayout xmlns:android = "http://schemas.android.com/apk/res/android"
     android:layout_width  = "match_parent"
     android:layout_height = "match_parent"

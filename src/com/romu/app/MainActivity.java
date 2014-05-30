@@ -134,6 +134,7 @@ public class MainActivity extends Activity
             renderMap();
             Log.d(LOG_TAG, "Map render finishes.");
 
+            // TODO: move this enable when navigation begins.
             enableBluetooth();
 
             Log.d(LOG_TAG, "MainActivity initialized.");
@@ -261,7 +262,7 @@ public class MainActivity extends Activity
             public void onServiceConnected(ComponentName componentName, IBinder service)
             {
                 Log.d(LOG_TAG, "Romu service connected.");
-                LocalBinder binder = (LocalBinder) service;
+                RomuService.LocalBinder binder = (RomuService.LocalBinder) service;
                 romuService = binder.getService();
             }
 
@@ -447,14 +448,18 @@ public class MainActivity extends Activity
     // =================================================================================
 
     /**
-     * This is the entry point for haptic navigation. It will start an activity
-     * to let user specify start location and destination.
+     * Callback for starting haptic navigating.
      */
     public void onNavigate(View view)
     {
-        // STOP
-        Intent intent = new Intent(this, LocationFetcherActivity.class);
-        startActivityForResult(intent, FETCH_START_AND_DESTINATION_REQUEST);
+        if(romuService == null)
+        {
+            Toast.makeText(this, "Romu service is not ready.", Toast.LENGTH_SHORT).show();
+        }
+        else
+        {
+            romuService.startNavigation(currentRoute);
+        }
     }
 
     // TODO: this functions is reserved for navigation capable of choosing
@@ -489,8 +494,12 @@ public class MainActivity extends Activity
      */
     public void onStopNavigation(View view)
     {
+        // Since we are navigating, romu serice must be present.
+        assert romuService != null :
+                "Romu service should not be null when trying to stop navigation.";
+
+        romuService.stopNavigation();
         isNavigationStopped = true;
-        // TODO: stop navigation process of bluetooth.
     }
 
     /**

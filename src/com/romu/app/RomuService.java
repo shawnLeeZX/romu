@@ -12,13 +12,18 @@ import com.google.android.gms.maps.model.LatLng;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.location.Location;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -33,6 +38,8 @@ import android.widget.Toast;
  *
  * Also, it provides inferfaces to application binded to it to start and stop
  * relevant service.
+ *
+ * TODO: code to receive action from BT and propagate it to MainActivity.
  */
 public class RomuService extends Service implements
     ConnectionCallbacks,
@@ -51,20 +58,24 @@ public class RomuService extends Service implements
 
     // Navigation status.
     private Location currentLocation = null;
-
-    // Binder given to clients.
-    private final IBinder binder = new LocalBinder();
+    private Route currentRoute;
 
     // Romu service related.
     private static final int FOREGROUND_ID = 1337;
+    private final IBinder binder = new LocalBinder();
+    private LocalBroadcastManager broadcastManager;
+
+    // BT service related.
+    private ServiceConnection serviceConnection;
+    private BluetoothLEService btService;
+    private BroadcastReceiver btUpdateReciever;
 
     @Override
     public void onCreate()
     {
         Log.d(LOG_TAG, "Creating Romu Services...");
 
-        // TODO: set up bluetooth service.
-
+        broadcastManager = LocalBroadcastManager.getInstance(this);
         makeForegroundService();
         initializeLocationService();
     }
@@ -197,6 +208,84 @@ public class RomuService extends Service implements
         );
 
         return latLng;
+    }
+
+    public void startNavigation(Route route)
+    {
+        // TODO: enable location update.(move location update here)
+        currentRoute = route;
+        startBluetoothSevice();
+    }
+
+    public void stopNavigation()
+    {
+        // TODO: disable location update.(move location dis update here)
+        stopBluetoothService();
+    }
+
+    // Communication with BluetoothLE service.
+    // =================================================================================
+    private void startBluetoothSevice()
+    {
+        Intent btServiceIntent = new Intent(this, BluetoothLEService.class);
+        Log.d(LOG_TAG, "Starting Bluetooth Service...");
+        startService(btServiceIntent);
+        // Connection with BT service for better interface.
+        serviceConnection = new ServiceConnection()
+        {
+            @Override
+            public void onServiceConnected(ComponentName componentName, IBinder service)
+            {
+                Log.d(LOG_TAG, "Bluetooth service connected.");
+                BluetoothLEService.LocalBinder binder = (BluetoothLEService.LocalBinder) service;
+                btService = binder.getService();
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName componentName)
+            {
+                Log.d(LOG_TAG, "Bluetooth service disconnected.");
+                btService = null;
+            }
+        };
+
+        // BroadcastReceiver to receive updates broadcast from Romu service.
+        btUpdateReciever = new BroadcastReceiver()
+        {
+            @Override
+            public void onReceive(Context context, Intent intent)
+            {
+                final String action = intent.getAction();
+                // TODO: receive broadcast from Bluetooth service.
+            }
+        };
+        broadcastManager.registerReceiver(btUpdateReciever, btUpdateIntentFilter());
+
+        Log.d(LOG_TAG, "Binding BluetoothLE service...");
+        bindService(btServiceIntent, serviceConnection, BIND_AUTO_CREATE);
+    }
+
+    private void stopBluetoothService()
+    {
+        broadcastManager.unregisterReceiver(btUpdateReciever);
+        unbindService(serviceConnection);
+        btService = null;
+
+        Intent btServiceIntent = new Intent(this, BluetoothLEService.class);
+        stopService(btServiceIntent);
+    }
+
+    private static IntentFilter btUpdateIntentFilter()
+    {
+        final IntentFilter intentFilter = new IntentFilter();
+
+        intentFilter.addAction(BluetoothLEService.ACTION_GATT_CONNECTED);
+        intentFilter.addAction(BluetoothLEService.ACTION_GATT_DISCONNECTED);
+        intentFilter.addAction(BluetoothLEService.ACTION_GATT_SERVICES_DISCOVERED);
+        intentFilter.addAction(BluetoothLEService.ACTION_DATA_AVAILABLE);
+        intentFilter.addAction(BluetoothLEService.FOUND_DEVICE);
+
+        return intentFilter;
     }
 
     // Methods related to connection with Location Service.
