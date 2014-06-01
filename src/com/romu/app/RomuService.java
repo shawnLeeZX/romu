@@ -65,6 +65,16 @@ public class RomuService extends Service implements
     private final IBinder binder = new LocalBinder();
     private LocalBroadcastManager broadcastManager;
 
+    public static final String DEVICE_FOUND  = "DEVICE FOUND";
+    public static final String ACTION_BT_NOT_ENABLED = 
+        "com.romu.app.ACTION_BT_NOT_ENABLED";
+    public static final String ROMU_CONNECTED = 
+        "com.romu.app.ROMU_CONNECTED";
+    public static final String ROMU_DISCONNECTED = 
+        "com.romu.app.ROMU_DISCONNECTED";
+    public static final String ROMU_WRONG = 
+        "com.romu.app.ROMU_WRONG";
+
     // BT service related.
     private ServiceConnection serviceConnection;
     private BluetoothLEService btService;
@@ -80,7 +90,7 @@ public class RomuService extends Service implements
 
         broadcastManager = LocalBroadcastManager.getInstance(this);
         makeForegroundService();
-        initializeLocationService();
+        initLocationService();
     }
 
     // Private methods.
@@ -91,7 +101,7 @@ public class RomuService extends Service implements
         notification.flags |= Notification.FLAG_NO_CLEAR;
         startForeground(FOREGROUND_ID, notification);
     }
-    private void initializeLocationService()
+    private void initLocationService()
     {
         locationRequest = LocationRequest.create();
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -218,18 +228,9 @@ public class RomuService extends Service implements
     {
         // TODO: enable location update.(move location update here)
         currentRoute = route;
-        startBluetoothSevice();
     }
 
-    public void stopNavigation()
-    {
-        // TODO: disable location update.(move location dis update here)
-        stopBluetoothService();
-    }
-
-    // Communication with BluetoothLE service.
-    // =================================================================================
-    private void startBluetoothSevice()
+    public void startBluetoothService()
     {
         if(!btServiceConnected)
         {
@@ -262,7 +263,27 @@ public class RomuService extends Service implements
                 public void onReceive(Context context, Intent intent)
                 {
                     final String action = intent.getAction();
-                    // TODO: receive broadcast from Bluetooth service.
+
+                    if(action == BluetoothLEService.ACTION_BLUETOOTH_NOT_ENABLED)
+                    {
+                        broadcastUpdate(ACTION_BT_NOT_ENABLED);
+                    }
+                    else if(action == BluetoothLEService.DEVICE_FOUND)
+                    {
+                        broadcastUpdate(DEVICE_FOUND);
+                    }
+                    else if(action == BluetoothLEService.ACTION_GATT_CONNECTED)
+                    {
+                        broadcastUpdate(ROMU_CONNECTED);
+                    }
+                    else if(action == BluetoothLEService.ACTION_GATT_DISCONNECTED)
+                    {
+                        broadcastUpdate(ROMU_DISCONNECTED);
+                    }
+                    else if(action == BluetoothLEService.ACTION_GATT_WRONG)
+                    {
+                        broadcastUpdate(ROMU_WRONG);
+                    }
                 }
             };
             broadcastManager.registerReceiver(btUpdateReciever, btUpdateIntentFilter());
@@ -274,7 +295,7 @@ public class RomuService extends Service implements
         }
     }
 
-    private void stopBluetoothService()
+    public void stopBluetoothService()
     {
         if(btServiceConnected)
         {
@@ -288,15 +309,33 @@ public class RomuService extends Service implements
         }
     }
 
+    public void stopNavigation()
+    {
+        // TODO: disable location update.(move location dis update here)
+        stopBluetoothService();
+    }
+
+    // Communication with RomuActivity.
+    // ================================================================================
+    private void broadcastUpdate(final String action)
+    {
+        final Intent intent = new Intent(action);
+        sendBroadcast(intent);
+    }
+
+    // Communication with BluetoothLE service.
+    // =================================================================================
     private static IntentFilter btUpdateIntentFilter()
     {
         final IntentFilter intentFilter = new IntentFilter();
 
+        intentFilter.addAction(BluetoothLEService.ACTION_BLUETOOTH_NOT_ENABLED);
         intentFilter.addAction(BluetoothLEService.ACTION_GATT_CONNECTED);
         intentFilter.addAction(BluetoothLEService.ACTION_GATT_DISCONNECTED);
         intentFilter.addAction(BluetoothLEService.ACTION_GATT_SERVICES_DISCOVERED);
         intentFilter.addAction(BluetoothLEService.ACTION_DATA_AVAILABLE);
-        intentFilter.addAction(BluetoothLEService.FOUND_DEVICE);
+        intentFilter.addAction(BluetoothLEService.ACTION_GATT_WRONG);
+        intentFilter.addAction(BluetoothLEService.DEVICE_FOUND);
 
         return intentFilter;
     }

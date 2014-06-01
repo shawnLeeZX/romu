@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	xmlns:tools="http://schemas.android.com/tools"
+	tools:context=".ConnectingFrag"
+	android:orientation		= "vertical"
+	android:layout_width	= "match_parent"
+	android:layout_height	= "@dimen/top_layout_height"
+	android:background      = "@color/black"
+	>
+
+	<RelativeLayout
+		android:layout_width	= "match_parent"
+		android:layout_height	= "match_parent"
+	>
+ 		<TextView
+ 			android:id="@+id/connecting"
+ 			android:layout_width="wrap_content"
+ 			android:layout_height="wrap_content"
+ 			android:layout_centerInParent="true"
+ 			android:textSize="24sp"
+ 			android:text="@string/connecting"
+ 		/>
+ 	</RelativeLayout>
+
+	<ImageView
+	android:layout_width = "match_parent"
+	android:layout_height = "@dimen/horizontal_colorbar_height"
+	android:layout_alignParentBottom="true"
+	android:background = "@color/blue"
+ 	></ImageView>
+
+</RelativeLayout>

@@ -4,4 +4,8 @@
 <!-- Add padding for all text view. -->
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content" />
+    android:singleLine="false"
+    android:layout_height="wrap_content"
+    android:background="#e2e2e2"
+    android:textColor="#000000"
+/>

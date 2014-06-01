@@ -18,6 +18,8 @@
     <string name="start_addr">Start Address</string>
     <string name="dest_addr">Destination</string>
     <string name="button_ok">OK</string>
+    <string name="button_connect">Connect</string>
+    <string name="connecting">Connecting...</string>
 
     <!-- For User Info. -->
     <!-- ========================================================= -->

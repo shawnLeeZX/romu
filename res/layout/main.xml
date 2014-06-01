@@ -10,43 +10,75 @@
         android:layout_height="match_parent"
         android:name="com.google.android.gms.maps.MapFragment"/>
 
-    <LinearLayout
-        android:layout_width    = "match_parent"
-        android:layout_height   = "wrap_content"
-        android:layout_alignParentBottom = "true"
-        >
-        <AutoCompleteTextView
-            android:id = "@+id/main_dest_addr"
-            android:layout_width    = "0dp"
-            android:layout_height   = "wrap_content"
-            android:layout_weight   = "1"
-            android:hint            = "@string/dest_addr"
-            />
-        <Button
-            android:layout_width    = "wrap_content"
-            android:layout_height   = "wrap_content"
-            android:text            = "@string/button_route"
-            android:onClick         = "onRoute"
-            />
-    </LinearLayout>
-    <LinearLayout
-        android:layout_width    = "wrap_content"
-        android:layout_height   = "wrap_content"
-        android:layout_alignParentLeft = "true"
-        >
-    <Button
-        android:layout_width    = "wrap_content"
-        android:layout_height   = "wrap_content"
-        android:text            = "@string/button_navigate"
-        android:onClick         = "onNavigate"
-            >
-    </Button>
-    <Button
-        android:layout_width    = "wrap_content"
-        android:layout_height   = "wrap_content"
-        android:text            = "@string/button_stop"
-        android:onClick         = "onStopNavigation"
-            >
-    </Button>
-    </LinearLayout>
+    <!-- Placeholder for top toolbar fragments. -->
+    <FrameLayout
+        android:id = "@+id/top_toolbar"
+        android:layout_width = "match_parent"
+        android:layout_height = "wrap_content">
+    </FrameLayout>
+
+    <!-- Placeholder for bottom info fragments. -->
+    <FrameLayout
+        android:id = "@+id/bottominfo"
+        android:layout_width = "match_parent"
+        android:layout_height = "wrap_content"
+        android:layout_alignParentBottom = "true">
+
+    </FrameLayout>
+    
+    <!-- Placeholder for bottom control bar fragments. -->
+    <FrameLayout
+        android:id = "@+id/bottomtoolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above = "@id/bottominfo" 
+    >
+    </FrameLayout>
+    <!-- <LinearLayout -->
+        <!-- android:layout_width    = "match_parent" -->
+        <!-- android:layout_height   = "wrap_content" -->
+        <!-- android:layout_alignParentBottom = "true" -->
+        <!-- > -->
+        <!-- <AutoCompleteTextView -->
+            <!-- android:id = "@+id/main_dest_addr" -->
+            <!-- android:layout_width    = "0dp" -->
+            <!-- android:layout_height   = "wrap_content" -->
+            <!-- android:layout_weight   = "1" -->
+            <!-- android:hint            = "@string/dest_addr" -->
+            <!-- /> -->
+        <!-- <Button -->
+            <!-- android:layout_width    = "wrap_content" -->
+            <!-- android:layout_height   = "wrap_content" -->
+            <!-- android:text            = "@string/button_route" -->
+            <!-- android:onClick         = "onRoute" -->
+            <!-- /> -->
+    <!-- </LinearLayout> -->
+    <!-- <LinearLayout -->
+        <!-- android:layout_width    = "wrap_content" -->
+        <!-- android:layout_height   = "wrap_content" -->
+        <!-- android:layout_alignParentLeft = "true" -->
+        <!-- android:orientation     = "vertical" -->
+        <!-- > -->
+    <!-- <Button -->
+        <!-- android:layout_width    = "wrap_content" -->
+        <!-- android:layout_height   = "wrap_content" -->
+        <!-- android:text            = "@string/button_navigate" -->
+        <!-- android:onClick         = "onNavigate" -->
+            <!-- > -->
+    <!-- </Button> -->
+    <!-- <Button -->
+        <!-- android:layout_width    = "wrap_content" -->
+        <!-- android:layout_height   = "wrap_content" -->
+        <!-- android:text            = "@string/button_stop" -->
+        <!-- android:onClick         = "onStopNavigation" -->
+            <!-- > -->
+    <!-- </Button> -->
+    <!-- <Button -->
+        <!-- android:layout_width    = "wrap_content" -->
+        <!-- android:layout_height   = "wrap_content" -->
+        <!-- android:text            = "@string/button_connect" -->
+        <!-- android:onClick         = "onConnect" -->
+            <!-- > -->
+    <!-- </Button> -->
+    <!-- </LinearLayout> -->
 </RelativeLayout>

@@ -43,8 +43,8 @@ package com.romu.app;
 
 import java.net.MalformedURLException;
 
+import com.google.android.gms.internal.ft;
 import com.google.android.gms.maps.*;
-
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -52,7 +52,9 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.Fragment;
 import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -70,15 +72,21 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 public class RomuActivity extends Activity
+    implements TopNavBarFragment.TopNavBarAttachedListener
 {
     public static final String LOG_TAG = "Romu: RomuActivity";
 
     // UI.
-    private FragmentManager fragmentManager = null;
-    private AutoCompleteTextView destAddrAutoCompleteTextView = null;
+    private FragmentManager fragmentManager;
+    private AutoCompleteTextView destAddrAutoCompleteTextView;
+    // State of UI of top navigation bar.
+    private static final int TOP_NAV_BAR_INIT = 0;
+    private static final int TOP_NAV_BAR_CONNECTING = 1;
+    private static final int TOP_NAV_BAR_CONNECTED = 2;
 
     // Requestion code for user interaction activities.
     private static final int ENABLE_BT_REQUEST = 0;
@@ -118,15 +126,12 @@ public class RomuActivity extends Activity
         setContentView(R.layout.main);
 
         Log.i(LOG_TAG, "Romu service initializing.");
-        initializeRomuService();
+        initRomuService();
 
         initNavigationUI();
 
         renderMap();
         Log.i(LOG_TAG, "Map render finishes.");
-
-        // TODO: move this enable when navigation begins.
-        enableBluetooth();
 
         Log.i(LOG_TAG, "MainActivity initialized.");
 
@@ -215,8 +220,41 @@ public class RomuActivity extends Activity
 
     private void initNavigationUI()
     {
-        destAddrAutoCompleteTextView = (AutoCompleteTextView) findViewById(R.id.main_dest_addr);
-        destAddrAutoCompleteTextView.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.list_item));
+        changeTopNavBar(TOP_NAV_BAR_INIT);
+    }
+
+    private void changeTopNavBar(final int MODE)
+    {
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        Fragment fragment = null;
+
+        switch(MODE)
+        {
+            case TOP_NAV_BAR_INIT:
+                {
+                    fragment = new InitTopNavBarFragment();
+                    break;
+                }
+            case TOP_NAV_BAR_CONNECTING:
+                {
+                    fragment = new ConnectingTopNavBarFragment();
+                    break;
+                }
+            case TOP_NAV_BAR_CONNECTED:
+                {
+                    fragment = new TopNavBarFragment();
+                    break;
+                }
+            default:
+                Log.w(LOG_TAG, "Navigation bar state out of range.");
+        }
+
+        if(findViewById(R.id.top_toolbar) != null)
+            ft.replace(R.id.top_toolbar, fragment);
+        else
+            ft.add(R.id.top_toolbar, fragment);
+
+        ft.commit();
     }
 
     /**
@@ -229,7 +267,7 @@ public class RomuActivity extends Activity
         map.setMyLocationEnabled(true);
     }
 
-    private void initializeRomuService()
+    private void initRomuService()
     {
         Intent romuServiceIntent = new Intent(this, RomuService.class);
         Log.i(LOG_TAG, "Starting Romu Service...");
@@ -260,60 +298,44 @@ public class RomuActivity extends Activity
             public void onReceive(Context context, Intent intent)
             {
                 final String action = intent.getAction();
-                // TODO: receive broadcast from Romu service.
-                /**
-                 * if(RomuService.DEVICE_CONNECTED.equals(action)){
-                 *     updateConnectionState(CONNECTED);
-                 *     return;
-                 * }
-                 * if(RomuService.DEVICE_SERVICES_DISCOVERED.equals(action)){
-                 *     updateConnectionState(DISCOVERED);
-                 *     return;
-                 * }
-                 * if(RomuService.BEGIN_NAVIGATION.equals(action)){
-                 *     updateConnectionState(NAV_MODE);
-                 *     return;
-                 * }
-                 * if(RomuService.DEVICE_DISCONNECTED.equals(action)){
-                 *     updateConnectionState(DISCONNECTED);
-                 *     return;
-                 * }
-                 * if(RomuService.DEVICE_FOUND.equals(action)){
-                 *     updateConnectionState(FOUND);
-                 *     return;
-                 * }
-                 * if(RomuService.STOP_NAVIGATION.equals(action)){
-                 *     updateConnectionState(STOP_NAV_MODE);
-                 *     return;
-                 * }
-                 * if(RomuService.NAVIGATION_COMPLETE.equals(action)){
-                 *     updateConnectionState(NAVIGATION_COMPLETE);
-                 *     return;
-                 * }
-                 * if(RomuService.PAUSE_NAVIGATION.equals(action)){
-                 *     updateConnectionState(PAUSE_NAV_MODE);
-                 *     return;
-                 * }
-                 * if(RomuService.LOCATION_CONNECTION_SUCCESS.equals(action)){
-                 *     notifyUser(action);
-                 *     return;
-                 * }
-                 * if(RomuService.LOCATION_SERVICE_CONNECTION_FAIL.equals(action)){
-                 *     notifyUser(action);
-                 *     return;
-                 * }
-                 * if(RomuService.LOCATION_SERVICE_DISCONNECTED.equals(action)){
-                 *     notifyUser(action);
-                 *     return;
-                 * }
-                 */
+
+                if(RomuService.ACTION_BT_NOT_ENABLED.equals(action))
+                {
+                    enableBluetooth();
+                }
+                else if(RomuService.DEVICE_FOUND.equals(action))
+                {
+                    // DEVICE_FOUND is for scanning device, not used for the
+                    // time being.
+                }
+                else if(RomuService.ROMU_CONNECTED.equals(action))
+                {
+                    changeTopNavBar(TOP_NAV_BAR_CONNECTED);
+                }
+                else if(RomuService.ROMU_DISCONNECTED.equals(action))
+                {
+                    // Notify user that bluetooth device has disconnected.
+                    ImageView connectionView = (ImageView) findViewById(R.id.connection_indicator);
+                    if(connectionView != null)
+                    {
+                        connectionView.setImageResource(R.drawable.disconnected);
+                        connectionView.postInvalidate();
+                    }
+                }
+                else if(RomuService.ROMU_WRONG.equals(action))
+                {
+                    Toast.makeText(
+                            RomuActivity.this,
+                            "Romu is not nearby or malfunctioning...",
+                            Toast.LENGTH_SHORT
+                            );
+                }
             }
         };
         registerReceiver(romuUpdateReciever, romuUpdateIntentFilter());
 
         Log.i(LOG_TAG, "Binding romu service...");
         bindService(romuServiceIntent, serviceConnection, BIND_AUTO_CREATE);
-
 
     }
 
@@ -415,6 +437,20 @@ public class RomuActivity extends Activity
 
         // Get current location's latitude and longitude.
         getRouteByRequestingGoogle(true);
+    }
+
+    /**
+     * Callback for connecting to found bluetooth device.
+     */
+    public void onConnect(View view)
+    {
+        if(romuService != null)
+        {
+            romuService.startBluetoothService();
+            changeTopNavBar(TOP_NAV_BAR_CONNECTING);
+        }
+        else
+            Toast.makeText(this, "Romu service is not ready yet", Toast.LENGTH_SHORT);
     }
 
     /**
@@ -616,16 +652,31 @@ public class RomuActivity extends Activity
         }
     }
 
+    // Communication with UI.
+    // =================================================================================
+    public void onTopNavBarAttached()
+    {
+
+        destAddrAutoCompleteTextView = (AutoCompleteTextView) findViewById(R.id.main_dest_addr);
+        destAddrAutoCompleteTextView.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.list_item));
+        // Notify user that bluetooth device has connected, since Top Nav Bar
+        // is showed when device is firstly connected.
+        ImageView connectionView = (ImageView) findViewById(R.id.connection_indicator);
+        connectionView.setImageResource(R.drawable.connected);
+    }
+
     // Communication with Romu service.
     // =================================================================================
     private static IntentFilter romuUpdateIntentFilter()
     {
         final IntentFilter intentFilter = new IntentFilter();
 
-        // intentFilter.addAction(RomuService.DEVICE_CONNECTED);
-        // intentFilter.addAction(RomuService.DEVICE_DISCONNECTED);
+        intentFilter.addAction(RomuService.ROMU_CONNECTED);
+        intentFilter.addAction(RomuService.ROMU_DISCONNECTED);
+        intentFilter.addAction(RomuService.ROMU_WRONG);
         // intentFilter.addAction(RomuService.BEGIN_NAVIGATION);
-        // intentFilter.addAction(RomuService.DEVICE_FOUND);
+        intentFilter.addAction(RomuService.DEVICE_FOUND);
+        intentFilter.addAction(RomuService.ACTION_BT_NOT_ENABLED);
         // intentFilter.addAction(RomuService.STOP_NAVIGATION);
         // intentFilter.addAction(RomuService.PAUSE_NAVIGATION);
         // intentFilter.addAction(RomuService.NAVIGATION_COMPLETE);
@@ -679,29 +730,4 @@ public class RomuActivity extends Activity
                 Log.e(LOG_TAG, "Activity result out of range.");
         }
     }
-
-    // TODO: Clean up needed.
-    // ================================================================================
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu items for use in the action bar
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_activity_actions, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int itemId = item.getItemId();
-        if (itemId == R.id.action_search) {
-            // openSearch();
-            return true;
-        } else if (itemId == R.id.action_settings) {
-            // openSettings();
-            return true;
-        } else {
-            return super.onOptionsItemSelected(item);
-        }
-    }
-
 }

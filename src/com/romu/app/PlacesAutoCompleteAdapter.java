@@ -33,7 +33,8 @@ public class PlacesAutoCompleteAdapter extends ArrayAdapter<String> implements F
 
     private ArrayList<String> resultList;
 
-    public PlacesAutoCompleteAdapter(Context context, int textViewResourceId) {
+    public PlacesAutoCompleteAdapter(Context context, int textViewResourceId)
+    {
         super(context, textViewResourceId);
     }
 
