@@ -1,28 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android = "http://schemas.android.com/apk/res/android"
-    android:layout_width  = "match_parent"
-    android:layout_height = "match_parent"
-    android:orientation      = "vertical"
-    >
-    <fragment
-        android:id="@+id/map"
-        android:layout_width="match_parent"
+<android.support.v4.widget.DrawerLayout
+    xmlns:android           ="http://schemas.android.com/apk/res/android"
+    android:id              ="@+id/drawer_layout"
+    android:layout_width    ="match_parent"
+    android:layout_height   ="match_parent">
+    <RelativeLayout xmlns:android = "http://schemas.android.com/apk/res/android"
+        android:layout_width  = "match_parent"
+        android:layout_height = "match_parent"
+        android:orientation      = "vertical"
+        >
+        <fragment
+            android:id="@+id/map"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:name="com.google.android.gms.maps.MapFragment"/>
+
+        <!-- Placeholder for top toolbar fragments. -->
+        <FrameLayout
+            android:id = "@+id/top_toolbar"
+            android:layout_width = "match_parent"
+            android:layout_height = "wrap_content">
+        </FrameLayout>
+
+        <!-- Placeholder for bottom control bar fragments. -->
+        <FrameLayout
+            android:id = "@+id/bottom_ctrl_bar_placeholder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom = "true"
+        >
+        </FrameLayout>
+
+        <ImageButton
+            android:id="@+id/button_drawer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/bottom_ctrl_bar_placeholder"
+            android:layout_alignParentLeft="true"
+            android:layout_marginBottom="0dp"
+            android:src="@drawable/ic_drawer"
+            android:onClick="showDrawer"
+        />
+    </RelativeLayout>
+
+    <!-- The drawer -->
+    <RelativeLayout
+        android:id="@+id/left_drawer"
+        android:layout_width="280dp"
         android:layout_height="match_parent"
-        android:name="com.google.android.gms.maps.MapFragment"/>
+        android:layout_gravity="start"
+        android:choiceMode="singleChoice"
+        android:divider="#bdc3c7"
+        android:dividerHeight="1dp"
+        android:background="#ecf0f1">
 
-    <!-- Placeholder for top toolbar fragments. -->
-    <FrameLayout
-        android:id = "@+id/top_toolbar"
-        android:layout_width = "match_parent"
-        android:layout_height = "wrap_content">
-    </FrameLayout>
-
-    <!-- Placeholder for bottom control bar fragments. -->
-    <FrameLayout
-        android:id = "@+id/bottom_ctrl_bar_placeholder"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above = "@id/bottominfo" 
-    >
-    </FrameLayout>
-</RelativeLayout>
+        <ListView android:id="@+id/option_list"
+            android:layout_width    = "match_parent"
+            android:layout_height   = "wrap_content"
+            android:choiceMode      = "singleChoice"
+        />
+        <Button
+            android:id              = "@+id/quitButton"
+            android:layout_width    = "match_parent"
+            android:layout_height   = "wrap_content"
+            android:layout_alignParentBottom = "true"
+            android:text            = "@string/button_quit"
+            android:onClick         = "onQuit"
+        />
+    </RelativeLayout>
+</android.support.v4.widget.DrawerLayout>

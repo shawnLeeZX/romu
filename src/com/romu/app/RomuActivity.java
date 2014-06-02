@@ -65,12 +65,16 @@ import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 public class RomuActivity extends Activity
@@ -91,6 +95,12 @@ public class RomuActivity extends Activity
     private static final int BOTTOM_CTRL_NAVIGATION_PAUSE = 2;
     private static final int BOTTOM_CTRL_NAVIGATION_STOP = 3;
     private static final int BOTTOM_CTRL_INFO = 4;
+    // Left Drawer.
+    private String[] drawerItems = { SETTINGS };
+    private DrawerLayout drawerLayout;
+    private ListView drawerList;
+    // Option list item.
+    private static final String SETTINGS = "Settings";
 
 
     // Requestion code for user interaction activities.
@@ -225,6 +235,16 @@ public class RomuActivity extends Activity
 
     private void initNavigationUI()
     {
+        // Initial config for left drawer.
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerList = (ListView) findViewById(R.id.option_list);
+
+        drawerList.setAdapter(new ArrayAdapter<String>(
+                    this, R.layout.drawer_list_item, drawerItems
+                    ));
+        drawerList.setOnItemClickListener(new DrawerItemClickListener());
+
+        // Top navigation bar.
         changeTopNavBar(TOP_NAV_BAR_INIT);
     }
 
@@ -448,7 +468,6 @@ public class RomuActivity extends Activity
 
         fragment.show(fragmentManager, "bluetooth_comfirmation");
     }
-
 
     // Naptic Navigation Related.
     // =================================================================================
@@ -729,6 +748,36 @@ public class RomuActivity extends Activity
     public void onShowInfo(View view)
     {
         changeBottomuCtrlBarState(BOTTOM_CTRL_INFO);
+    }
+
+    // General UI.
+    // =================================================================================
+    public void onQuit(View view)
+    {
+        /* code */
+    }
+
+    // Show settings by left drawer when clicked.
+    public void showDrawer(View view)
+    {
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        View leftDrawer = (View) findViewById(R.id.left_drawer);
+        drawerLayout.openDrawer(leftDrawer);
+    }
+
+    // Drawer list click listener.
+    private class DrawerItemClickListener implements ListView.OnItemClickListener
+    {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+        {
+            String item = parent.getItemAtPosition(position).toString();
+            if(item.equals(SETTINGS))
+            {
+                Intent intent = new Intent(RomuActivity.this, GetInfoActivity.class);
+                startActivity(intent);
+            }
+        }
     }
 
     // Communication with UI.

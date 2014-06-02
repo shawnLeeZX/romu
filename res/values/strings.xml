@@ -21,6 +21,9 @@
     <string name="button_connect">Connect</string>
     <string name="connecting">Connecting...</string>
 
+    <!-- In option list -->
+    <string name="button_quit">Quit</string>
+
     <!-- For User Info. -->
     <!-- ========================================================= -->
     <string name="mac_address_prompt">Please Input The Number of Your Romu:</string>
