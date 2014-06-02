@@ -38,21 +38,23 @@
             android:layout_above="@id/bottom_ctrl_bar_placeholder"
             android:layout_alignParentLeft="true"
             android:layout_marginBottom="0dp"
-            android:src="@drawable/ic_drawer"
+            android:src="@drawable/romucyan"
             android:onClick="showDrawer"
+            android:background="@color/black"
         />
     </RelativeLayout>
 
     <!-- The drawer -->
     <RelativeLayout
         android:id="@+id/left_drawer"
-        android:layout_width="280dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:choiceMode="singleChoice"
-        android:divider="#bdc3c7"
-        android:dividerHeight="1dp"
-        android:background="#ecf0f1">
+        android:layout_width    = "280dp"
+        android:layout_height   = "match_parent"
+        android:layout_gravity  = "start"
+        android:choiceMode      = "singleChoice"
+        android:divider         = "#bdc3c7"
+        android:dividerHeight   = "1dp"
+        android:background      = "@color/black"
+        >
 
         <ListView android:id="@+id/option_list"
             android:layout_width    = "match_parent"
@@ -62,6 +64,8 @@
         <Button
             android:id              = "@+id/quitButton"
             android:layout_width    = "match_parent"
+            android:background      = "@color/lightblue"
+            android:padding         = "12dp"
             android:layout_height   = "wrap_content"
             android:layout_alignParentBottom = "true"
             android:text            = "@string/button_quit"
