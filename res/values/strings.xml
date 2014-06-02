@@ -39,5 +39,8 @@
     <string name="prompt_dialog_cancel">Cancel</string>
     <string name="prompt_dialog_quit">Quit</string>
 
+    <!-- TODO: tmp strings -->
+    <string name="waypoints">7 waypoints passed</string>
+    <string name="distance">2.7 km to go...</string>
 
 </resources>

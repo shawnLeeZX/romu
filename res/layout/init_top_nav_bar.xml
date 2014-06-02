@@ -10,7 +10,7 @@
 	<RelativeLayout 
 		android:orientation		= "horizontal"
 		android:layout_width	= "match_parent"
-		android:layout_height	= "55dp"
+		android:layout_height	= "80dp"
 		android:background		= "@color/black"
 	>
 
@@ -18,7 +18,7 @@
 		<ImageView
 			android:id = "@+id/vertical_colorbar_topmenu"
 			android:layout_width = "3dp"
-			android:layout_height = "55dp"
+			android:layout_height = "80dp"
 			android:layout_centerInParent = "true"
 			android:background = "@color/blue"
  		></ImageView>
@@ -50,8 +50,8 @@
 				android:layout_width			= "@dimen/top_imagebutton"
 				android:layout_height			= "@dimen/top_imagebutton"		
 				android:layout_centerInParent   		= "true"
-				android:background				= "@drawable/disconnected"
-				android:onClick					= "onConnect"
+				android:background				= "@drawable/connected"
+				android:onClick					= "Connect"
  			/> 
  		</RelativeLayout>
 	

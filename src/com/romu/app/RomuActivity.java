@@ -43,7 +43,6 @@ package com.romu.app;
 
 import java.net.MalformedURLException;
 
-import com.google.android.gms.internal.ft;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -67,11 +66,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AutoCompleteTextView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -87,6 +85,13 @@ public class RomuActivity extends Activity
     private static final int TOP_NAV_BAR_INIT = 0;
     private static final int TOP_NAV_BAR_CONNECTING = 1;
     private static final int TOP_NAV_BAR_CONNECTED = 2;
+    // State of UI of bottom control bar.
+    private static final int BOTTOM_CTRL_NAVIGATION_INIT = 0;
+    private static final int BOTTOM_CTRL_IN_NAVIGATING = 1;
+    private static final int BOTTOM_CTRL_NAVIGATION_PAUSE = 2;
+    private static final int BOTTOM_CTRL_NAVIGATION_STOP = 3;
+    private static final int BOTTOM_CTRL_INFO = 4;
+
 
     // Requestion code for user interaction activities.
     private static final int ENABLE_BT_REQUEST = 0;
@@ -257,6 +262,56 @@ public class RomuActivity extends Activity
         ft.commit();
     }
 
+    private void changeBottomuCtrlBarState(final int MODE)
+    {
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        Fragment fragment = null;
+
+        switch(MODE)
+        {
+            case BOTTOM_CTRL_NAVIGATION_INIT:
+                {
+                    fragment = new BottomCtrlBarFragment();
+                    ft.add(R.id.bottom_ctrl_bar_placeholder, fragment);
+                    ft.commit();
+                    break;
+                }
+            case BOTTOM_CTRL_IN_NAVIGATING:
+                {
+                    ImageButton stateButton = (ImageButton) findViewById(R.id.state_button);
+                    stateButton.setBackgroundResource(R.drawable.pause);
+                    stateButton.postInvalidate();
+                    break;
+                }
+            case BOTTOM_CTRL_NAVIGATION_PAUSE:
+                {
+                    ImageButton stateButton = (ImageButton) findViewById(R.id.state_button);
+                    stateButton.setBackgroundResource(R.drawable.play);
+                    stateButton.postInvalidate();
+                    break;
+                }
+            case BOTTOM_CTRL_NAVIGATION_STOP:
+                {
+                    fragment = fragmentManager.findFragmentById(R.id.bottom_ctrl_bar_placeholder);
+                    ft.remove(fragment);
+                    ft.commit();
+                    break;
+                }
+            case BOTTOM_CTRL_INFO:
+                {
+                    fragment = new BottomInfoFragment();
+                    ft.replace(R.id.bottom_ctrl_bar_placeholder, fragment);
+                    ft.addToBackStack(null);
+                    ft.commit();
+                    break;
+                }
+            default:
+                Log.w(LOG_TAG, "Bottom control bar state out of range.");
+        }
+
+
+    }
+
     /**
      * Initial rendering of Google Map at app startup.
      */
@@ -402,7 +457,7 @@ public class RomuActivity extends Activity
     /**
      * Callback for starting haptic navigating.
      */
-    public void onNavigate(View view)
+    public void onNavigationStateChange(View view)
     {
         if(romuService == null)
         {
@@ -410,8 +465,18 @@ public class RomuActivity extends Activity
         }
         else
         {
-            romuService.startNavigation(currentRoute);
-            isNavigationStopped = false;
+            if(isNavigationStopped)
+            {
+                romuService.startNavigation();
+                changeBottomuCtrlBarState(BOTTOM_CTRL_IN_NAVIGATING);
+                isNavigationStopped = false;
+            }
+            else
+            {
+                romuService.stopNavigation();
+                changeBottomuCtrlBarState(BOTTOM_CTRL_NAVIGATION_PAUSE);
+                isNavigationStopped = true;
+            }
         }
     }
 
@@ -466,6 +531,7 @@ public class RomuActivity extends Activity
                 "Romu service should not be null when trying to stop navigation.";
 
         romuService.stopNavigation();
+        changeBottomuCtrlBarState(BOTTOM_CTRL_NAVIGATION_STOP);
         isNavigationStopped = true;
     }
 
@@ -569,6 +635,17 @@ public class RomuActivity extends Activity
             // TODO: adjust the padding when refining.
             // TODO: add animation when moving camera.
             map.moveCamera(CameraUpdateFactory.newLatLngBounds(currentRoute.getBounds(), 0));
+
+            // Close the keyboard automatically.
+            InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            im.hideSoftInputFromWindow(destAddrAutoCompleteTextView.getWindowToken(), 0);
+
+            // Pass the new route to Romu service.
+            romuService.setRoute(currentRoute);
+
+            // Pop up the bottom control pane.
+            changeBottomuCtrlBarState(BOTTOM_CTRL_NAVIGATION_INIT);
+            isNavigationStopped = false;
         }
 
         /**
@@ -613,8 +690,6 @@ public class RomuActivity extends Activity
          */
         private Route directions(LatLng startLatLng, String destAddr)
         {
-            Route route = null;
-
             // Construct http request to Google Direction API service.
             String jsonURL = "http://maps.googleapis.com/maps/api/directions/json?";
             StringBuilder sBuilder = new StringBuilder(jsonURL);
@@ -650,6 +725,11 @@ public class RomuActivity extends Activity
             }
             return route;
         }
+    }
+
+    public void onShowInfo(View view)
+    {
+        changeBottomuCtrlBarState(BOTTOM_CTRL_INFO);
     }
 
     // Communication with UI.

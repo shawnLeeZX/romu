@@ -224,10 +224,16 @@ public class RomuService extends Service implements
         return latLng;
     }
 
-    public void startNavigation(Route route)
+
+    /**
+     * Note that before calling this function, {@link #setRoute(Route route)}
+     * should be called to set current route first.
+     */
+    public void startNavigation()
     {
+        assert currentRoute != null : "Route is null. Program should not reach here!";
+        Log.i(LOG_TAG, "Navigation started.");
         // TODO: enable location update.(move location update here)
-        currentRoute = route;
     }
 
     public void startBluetoothService()
@@ -311,8 +317,13 @@ public class RomuService extends Service implements
 
     public void stopNavigation()
     {
+        Log.i(LOG_TAG, "Navigation stopped.");
         // TODO: disable location update.(move location dis update here)
-        stopBluetoothService();
+    }
+
+    public void setRoute(Route route)
+    {
+        currentRoute = route;
     }
 
     // Communication with RomuActivity.

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".BottomStartFrag"
+    android:id="@+id/bottom_ctrl_bar"
+    android:layout_width="match_parent"
+    android:layout_height="130dp"
+    android:background="@drawable/bottom_bar"
+    android:orientation="horizontal" >    
+
+        <ImageButton
+            android:id="@+id/info_bt"
+            android:layout_width="@dimen/bottom_smallbutton_control"
+            android:layout_height="@dimen/bottom_smallbutton_control"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="25dp"
+            android:layout_marginTop="70dp"
+            android:background="@drawable/info"
+            android:onClick="onShowInfo"/>
+
+        <ImageButton
+            android:id="@+id/cancel_bt"
+            android:layout_width="@dimen/bottom_smallbutton_control"
+            android:layout_height="@dimen/bottom_smallbutton_control"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="25dp"
+            android:layout_marginTop="70dp"
+            
+            android:background="@drawable/cancel"
+            android:onClick="onStopNavigation" />
+
+        <ImageButton
+            android:id="@+id/state_button"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_centerHorizontal="true"
+            
+            android:layout_alignBottom="@id/cancel_bt"
+            android:background="@drawable/play"
+            android:onClick="onNavigationStateChange" />
+</RelativeLayout>
