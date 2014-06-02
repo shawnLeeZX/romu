@@ -1,7 +1,8 @@
 package com.romu.app;
 
-import com.google.android.gms.common.ConnectionResult;
+import java.util.ArrayList;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
 import com.google.android.gms.location.LocationClient;
@@ -52,13 +53,40 @@ public class RomuService extends Service implements
     private boolean locationServiceConnected = false;
 
     private LocationRequest locationRequest     = null;
-    private long locationUpdateInterval         = 7000;
 
     private LocationClient locationClient = null;
 
     // Navigation status.
     private Location currentLocation = null;
     private Route currentRoute;
+    private boolean listenToNavigationUpdates = false;
+    private static long updateFrequencyDefault = 17000;
+    private static long listenTimeInterval = 5000;
+    private static long updateScalar = 7000;
+    private static long currentTime;
+    private static long startTime;
+    private static boolean enoughTimeHasPassed=false;  
+    private ArrayList<LatLng> waypoints = null;
+    private static ArrayList<Location> progress;
+    private int currentIndex;
+    private Location currentDestination;
+    private Location finalDestination;
+    private static final int TWO_MINUTES = 1000 * 60 * 2;
+    private static final double GPS_RADIUS = 35;
+    private int deltaOn = 0;
+    private int distanceOn = 1;
+    private int thresholdForLost =30;
+    private static final long locationUpdateInterval = 7000;
+
+    //Navigation commands
+    public static final String PAUSE_NAV_COMMAND = "#6#1#";
+    public static final String BEGIN_NAV_COMMAND = "#5#1#";
+    public static final String ARRIVED_FINAL_COMMAND = "#3#1#";
+    public static final String ARRIVED_CURRENT_COMMAND = "#4#1#";
+    public static final String LOCATION_UPDATE = "LOCATION UPDATE";
+    public static final String ARRIVED_CURRENT = "ARRIVED AT CURRENT WAYPOINT";
+    public static final String ARRIVED_FINAL = "ARRIVED AT DESTINATION";
+
 
     // Romu service related.
     private static final int FOREGROUND_ID = 1337;
@@ -74,6 +102,9 @@ public class RomuService extends Service implements
         "com.romu.app.ROMU_DISCONNECTED";
     public static final String ROMU_WRONG = 
         "com.romu.app.ROMU_WRONG";
+    public static final String EXTRA_DATA = 
+         "com.romu.app.EXTRA_DATA";
+
 
     // BT service related.
     private ServiceConnection serviceConnection;
@@ -95,13 +126,203 @@ public class RomuService extends Service implements
 
     // Private methods.
     // ================================================================================
+    //compares two locations to determine the better locaiton based on accuracy, time, provider   
+     private boolean isBetterLocation(Location location, Location currentBestLocation) {
+        if (currentBestLocation == null) {
+            // A new location is always better than no location
+            return true;
+        }
+
+        // Check whether the new location fix is newer or older
+        long timeDelta = location.getTime() - currentBestLocation.getTime();
+        boolean isSignificantlyNewer = timeDelta > TWO_MINUTES;
+        boolean isSignificantlyOlder = timeDelta < -TWO_MINUTES;
+        boolean isNewer = timeDelta > 0;
+
+        // If it's been more than two minutes since the current location, use the new location
+        // because the user has likely moved
+        if (isSignificantlyNewer) {
+            return true;
+            // If the new location is more than two minutes older, it must be worse
+        } else if (isSignificantlyOlder) {
+            return false;
+        }
+
+        // Check whether the new location fix is more or less accurate
+        int accuracyDelta = (int) (location.getAccuracy() - currentBestLocation.getAccuracy());
+        boolean isLessAccurate = accuracyDelta > 0;
+        boolean isMoreAccurate = accuracyDelta < 0;
+        boolean isSignificantlyLessAccurate = accuracyDelta > 200;
+
+        // Check if the old and new location are from the same provider
+        boolean isFromSameProvider = isSameProvider(location.getProvider(),
+                currentBestLocation.getProvider());
+
+        // Determine location quality using a combination of timeliness and accuracy
+        if (isMoreAccurate) {
+            return true;
+        } else if (isNewer && !isLessAccurate) {
+            return true;
+        } else if (isNewer && !isSignificantlyLessAccurate && isFromSameProvider) {
+            return true;
+        }
+        return false;
+    }
+
+    /** Checks whether two providers are the same */
+    private boolean isSameProvider(String provider1, String provider2) {
+        if (provider1 == null) {
+            return provider2 == null;
+        }
+        return provider1.equals(provider2);
+    }
+
+
+    //Chanages frequency of location update based on promimity to current destiniation
+    private double chooseDistanceTier(float distanceTo){
+        double distanceScalar = 0;
+        if(distanceTo>=250)distanceScalar = 1;
+        else if(distanceTo<250&&distanceTo>=200)distanceScalar =0.8;
+        else if(distanceTo<200&&distanceTo>=150)distanceScalar =0.7;
+        else if(distanceTo<150&&distanceTo>=100)distanceScalar =0.6;
+        else if(distanceTo<100&&distanceTo>=50)distanceScalar =0.5;
+        else if(distanceTo<50)distanceScalar =0.1;
+        return distanceScalar;
+    }
+
+    /*
+    Uses a scalar for proximity and a scalar for "degress of lost" to modify the frequency of update.
+    Only one scalar can play a role at a time
+    */
+    private void updateFrequencyOfLocationUpdate(double distanceScalar,double deltaScalar){
+        listenTimeInterval = (long) (updateFrequencyDefault - (distanceOn*(1-distanceScalar)*updateScalar) -
+         (deltaOn*deltaScalar*updateScalar));
+    }
+
+    private boolean checkRangeOf(float heading){
+        return heading>=(-180)&& heading<=180;
+        
+    }
+
+        /*
+    function to determine if we are ready to send a new update via btUpdate
+
+    */
+    private void writeUpdate(String action, String command){
+            if(listenToNavigationUpdates){
+                currentTime = System.currentTimeMillis();
+                if((currentTime-startTime) >=  listenTimeInterval){
+                    startTime = currentTime;
+                    enoughTimeHasPassed = true;
+            }
+            if(enoughTimeHasPassed || command.equals(ARRIVED_FINAL)){
+                enoughTimeHasPassed=false;
+                sendCommand(command);
+            }
+        }
+        
+    }
+
+
+
+     /*
+    Bulk of navigation computation. Uses the current location and 
+    current destination to generate a signal for the bluetooth device
+    based on current orientation and heading to the destination 
+
+    */
+    private void makeUseOfLocation(Location location){    
+        if(location== null)return; 
+        Location lastKnownLocation = locationClient.getLastLocation();
+        if(isBetterLocation(lastKnownLocation, currentLocation)){
+            currentLocation = lastKnownLocation;
+            location = lastKnownLocation;
+        }
+        float delta;
+        float headingToDestination = location.bearingTo(currentDestination);
+        if(!checkRangeOf(headingToDestination))return;
+        if(headingToDestination<0)headingToDestination+=360;
+        float currentBearing = location.getBearing();
+        float distanceTo = location.distanceTo(currentDestination);
+        if(distanceOn==1){
+            double distanceScalar = chooseDistanceTier(distanceTo);
+            updateFrequencyOfLocationUpdate(distanceScalar, 0);
+        }
+        if(distanceTo <= location.getAccuracy()||distanceTo<=GPS_RADIUS){
+            String action = ARRIVED_CURRENT;
+            if(currentDestination.equals(finalDestination)){
+                action = ARRIVED_FINAL;
+                String arrived = ARRIVED_FINAL_COMMAND;
+                writeUpdate(action, arrived);
+                stopNavigation();
+                return;
+            }else{
+                String currentArrived = ARRIVED_CURRENT_COMMAND;
+                writeUpdate(action, currentArrived);
+                updateCurrentDestination();
+                return;
+            }
+            
+        }
+        String command="";
+        if(!location.hasBearing()||currentBearing==0){
+            command +="#2#";
+            command += String.valueOf(headingToDestination);
+            command +="#";
+            writeUpdate(LOCATION_UPDATE, command);
+            return;
+        }
+        if(currentBearing>0.0){
+            delta = headingToDestination - currentBearing;
+            if(delta<0)delta+=360;
+            if(delta>thresholdForLost){
+                distanceOn = 0;
+                deltaOn = 1;
+                double deltaScalar = 180-delta;
+                if(deltaScalar<0)deltaScalar+=180;
+                updateFrequencyOfLocationUpdate(0,(deltaScalar/180));
+            }else {
+                deltaOn = 0;
+                distanceOn = 1;
+            }
+            command +="#1#";
+            command += String.valueOf(delta);
+            command +="#";
+            writeUpdate(LOCATION_UPDATE, command);
+            return;
+        }
+    }
+
+    private void updateCurrentDestination() {
+        
+        
+        //increment segment is boolean : false if next destination is final
+        if(currentRoute.incrementSegment())
+            currentDestination = currentRoute.getCurrentDesination();
+        else currentDestination = finalDestination;
+        //int currentIndex = currentRoute.getCurrentIndex();
+        //broadcastUpdate(ARRIVED_CURRENT, currentRoute);
+        listenTimeInterval = 500;
+    }
+
+
+
+
+
+    private Location makeLocation(LatLng ll){
+        Location location = new Location("");
+        location.setLatitude(ll.latitude);
+        location.setLongitude(ll.longitude);
+        return location;
+    }
+
+
     private void makeForegroundService()
     {
         Notification notification = makeNotification();
         notification.flags |= Notification.FLAG_NO_CLEAR;
         startForeground(FOREGROUND_ID, notification);
     }
-
     private void initLocationService()
     {
         locationRequest = LocationRequest.create();
@@ -234,8 +455,17 @@ public class RomuService extends Service implements
     {
         assert currentRoute != null : "Route is null. Program should not reach here!";
         Log.i(LOG_TAG, "Navigation started.");
-        // TODO: enable location update.(move location update here)
+        listenToNavigationUpdates = true;
+        startTime = System.currentTimeMillis();
+        finalDestination = makeLocation(currentRoute.getEndLocation());
+        currentLocation = locationClient.getLastLocation();
+        waypoints = currentRoute.getPoints();
+        sendCommand(BEGIN_NAV_COMMAND);
+        currentDestination = currentRoute.getCurrentDesination();         
+        listenTimeInterval = 1000;
     }
+
+
 
     public void startBluetoothService()
     {
@@ -319,11 +549,16 @@ public class RomuService extends Service implements
     public void stopNavigation()
     {
         Log.i(LOG_TAG, "Navigation stopped.");
+        listenToNavigationUpdates = false;
+
+        sendCommand(PAUSE_NAV_COMMAND);
+
     }
 
     public void setRoute(Route route)
     {
         currentRoute = route;
+
     }
 
     // Communication with RomuActivity.
@@ -333,6 +568,13 @@ public class RomuService extends Service implements
         final Intent intent = new Intent(action);
         sendBroadcast(intent);
     }
+
+    private void broadcastUpdate(final String action, String extra){
+        final Intent intent = new Intent(action);
+        intent.putExtra(EXTRA_DATA, extra);
+        sendBroadcast(intent);
+    }
+
 
     // Communication with BluetoothLE service.
     // =================================================================================
@@ -433,5 +675,6 @@ public class RomuService extends Service implements
     {
         // Keep track of current location.
         currentLocation = location;
+        makeUseOfLocation(location);
     }
 }
