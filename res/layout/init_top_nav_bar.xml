@@ -51,7 +51,7 @@
 				android:layout_height			= "@dimen/top_imagebutton"		
 				android:layout_centerInParent   		= "true"
 				android:background				= "@drawable/disconnected"
-				android:onClick					= "Connect"
+				android:onClick					= "onConnect"
  			/> 
  		</RelativeLayout>
 	
