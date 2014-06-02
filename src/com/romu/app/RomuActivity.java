@@ -318,7 +318,6 @@ public class RomuActivity extends Activity
     private void renderMap()
     {
         setUpMapIfNeeded();
-        // TODO: reimplement this button when refining.
         map.setMyLocationEnabled(true);
     }
 

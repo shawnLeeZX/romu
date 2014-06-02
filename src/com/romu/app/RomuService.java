@@ -318,7 +318,6 @@ public class RomuService extends Service implements
     public void stopNavigation()
     {
         Log.i(LOG_TAG, "Navigation stopped.");
-        // TODO: disable location update.(move location dis update here)
     }
 
     public void setRoute(Route route)
@@ -433,12 +432,5 @@ public class RomuService extends Service implements
     {
         // Keep track of current location.
         currentLocation = location;
-
-        // Report to the UI that the location was updated
-        // TODO: remove when finishing debugging.
-        String msg = "Updated Location: " +
-                Double.toString(location.getLatitude()) + "," +
-                Double.toString(location.getLongitude());
-        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 }
