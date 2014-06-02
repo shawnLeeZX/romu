@@ -101,6 +101,7 @@ public class RomuService extends Service implements
         notification.flags |= Notification.FLAG_NO_CLEAR;
         startForeground(FOREGROUND_ID, notification);
     }
+
     private void initLocationService()
     {
         locationRequest = LocationRequest.create();
