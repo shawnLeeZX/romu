@@ -166,11 +166,6 @@ public class RomuActivity extends Activity
     {
         super.onStart();
 
-        if(romuService != null)
-        {
-            romuService.startLocationService();
-        }
-
         // Set up map object if it is destroyed.
         setUpMapIfNeeded();
     }
@@ -181,17 +176,6 @@ public class RomuActivity extends Activity
     @Override
     protected void onPause()
     {
-        // If Romu is not in the navigation model, disable location service
-        // for saving battery.
-        if(isNavigationStopped)
-        {
-            Log.i(LOG_TAG,
-                    "Temporarily disable location service since romu is not visible and not navigating.");
-            if(romuService != null)
-            {
-                romuService.stopLocationService();
-            }
-        }
         super.onStop();
     }
 
@@ -201,8 +185,6 @@ public class RomuActivity extends Activity
     @Override
     protected void onDestroy()
     {
-        Log.i(LOG_TAG, "Romu quited.");
-        stopRomuService();
         super.onDestroy();
     }
 
@@ -754,7 +736,8 @@ public class RomuActivity extends Activity
     // =================================================================================
     public void onQuit(View view)
     {
-        /* code */
+        stopRomuService();
+        finish();
     }
 
     // Show settings by left drawer when clicked.

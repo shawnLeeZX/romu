@@ -109,6 +109,7 @@ public class RomuService extends Service implements
 
         locationClient = new LocationClient(this, this, this);
         Log.i(LOG_TAG, "Location service initialized.");
+        startLocationService();
     }
 
     /**
@@ -169,7 +170,6 @@ public class RomuService extends Service implements
     public int onStartCommand(Intent intent, int flags, int startId)
     {
         Log.i("Romu Service", "Received start id " + startId + ": " + intent);
-        startLocationService();
         // Keeps OS from shutting down service when activity has changed state
         return START_STICKY;
     }
