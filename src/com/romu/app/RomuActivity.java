@@ -65,6 +65,7 @@ import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.View;
@@ -120,6 +121,7 @@ public class RomuActivity extends Activity
     private BroadcastReceiver romuUpdateReciever = null;
     private ServiceConnection serviceConnection = null; 
     private RomuService romuService = null;
+    private LocalBroadcastManager broadcastManager;
 
     // Bluetooth related.
     private boolean bluetoothEnabled = false;
@@ -136,6 +138,7 @@ public class RomuActivity extends Activity
         super.onCreate(savedInstanceState);
 
         fragmentManager = getFragmentManager();
+        broadcastManager = LocalBroadcastManager.getInstance(this);
         isNavigationStopped = true;
 
         setContentView(R.layout.main);
@@ -388,7 +391,7 @@ public class RomuActivity extends Activity
                 }
             }
         };
-        registerReceiver(romuUpdateReciever, romuUpdateIntentFilter());
+        broadcastManager.registerReceiver(romuUpdateReciever, romuUpdateIntentFilter());
 
         Log.i(LOG_TAG, "Binding romu service...");
         bindService(romuServiceIntent, serviceConnection, BIND_AUTO_CREATE);
@@ -397,7 +400,7 @@ public class RomuActivity extends Activity
 
     private void stopRomuService()
     {
-        unregisterReceiver(romuUpdateReciever);
+        broadcastManager.unregisterReceiver(romuUpdateReciever);
         unbindService(serviceConnection);
         romuService = null;
 

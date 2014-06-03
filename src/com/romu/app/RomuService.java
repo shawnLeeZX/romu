@@ -680,6 +680,9 @@ public class RomuService extends Service implements
     {
         // Keep track of current location.
         currentLocation = location;
-        makeUseOfLocation(location);
+        if(currentRoute != null)
+        {
+            makeUseOfLocation(location);
+        }
     }
 }
