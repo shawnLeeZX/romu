@@ -169,11 +169,9 @@ public class RomuActivity extends Activity
 
         initNavigationUI();
         setUpMapIfNeeded();
-
         Log.i(LOG_TAG, "Map render finishes.");
 
         Log.i(LOG_TAG, "MainActivity initialized.");
-
     }
 
     @Override
@@ -565,6 +563,17 @@ public class RomuActivity extends Activity
 
         // Get current location's latitude and longitude.
         getRouteByRequestingGoogle(true);
+
+        InputMethodManager im = (InputMethodManager)
+            getSystemService(Context.INPUT_METHOD_SERVICE); 
+        im.hideSoftInputFromWindow(destAddrAutoCompleteTextView.getWindowToken(), 0);
+
+        // Pass the new route to Romu service.
+        romuService.setRoute(currentRoute);
+
+        // Pop up the bottom control pane.
+        changeBottomuCtrlBarState(BOTTOM_CTRL_NAVIGATION_INIT);
+        isNavigationStopped = false;
     }
 
     /**
@@ -666,17 +675,6 @@ public class RomuActivity extends Activity
         protected void onPostExecute(Void result)
         {
             drawMapAndMoveCamera();
-
-            InputMethodManager im = (InputMethodManager)
-                getSystemService(Context.INPUT_METHOD_SERVICE); 
-            im.hideSoftInputFromWindow(destAddrAutoCompleteTextView.getWindowToken(), 0);
-
-            // Pass the new route to Romu service.
-            romuService.setRoute(currentRoute);
-
-            // Pop up the bottom control pane.
-            changeBottomuCtrlBarState(BOTTOM_CTRL_NAVIGATION_INIT);
-            isNavigationStopped = false;
         }
 
         /**
