@@ -122,6 +122,7 @@ public class RomuService extends Service implements
         broadcastManager = LocalBroadcastManager.getInstance(this);
         makeForegroundService();
         initLocationService();
+        startBluetoothService();
     }
 
     // Private methods.

@@ -312,7 +312,7 @@ public class BluetoothLEService extends Service implements LeScanCallback
     {
         Log.i(LOG_TAG, "BluetoothLE service is going to be destroyed.");
 
-        bluetoothGatt.disconnect();
+        bluetoothGatt.close();
 
         Log.i(LOG_TAG, "BluetoothLE service destroyed.");
     }

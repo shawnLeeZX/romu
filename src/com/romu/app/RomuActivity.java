@@ -230,41 +230,12 @@ public class RomuActivity extends Activity
         drawerList.setOnItemClickListener(new DrawerItemClickListener());
 
         // Top navigation bar.
-        changeTopNavBar(TOP_NAV_BAR_INIT);
-    }
-
-    private void changeTopNavBar(final int MODE)
-    {
         FragmentTransaction ft = fragmentManager.beginTransaction();
         Fragment fragment = null;
-
-        switch(MODE)
-        {
-            case TOP_NAV_BAR_INIT:
-                {
-                    fragment = new InitTopNavBarFragment();
-                    break;
-                }
-            case TOP_NAV_BAR_CONNECTING:
-                {
-                    fragment = new ConnectingTopNavBarFragment();
-                    break;
-                }
-            case TOP_NAV_BAR_CONNECTED:
-                {
-                    fragment = new TopNavBarFragment();
-                    break;
-                }
-            default:
-                Log.w(LOG_TAG, "Navigation bar state out of range.");
-        }
-
-        if(findViewById(R.id.top_toolbar) != null)
-            ft.replace(R.id.top_toolbar, fragment);
-        else
-            ft.add(R.id.top_toolbar, fragment);
-
+        fragment = new TopNavBarFragment();
+        ft.add(R.id.top_toolbar, fragment);
         ft.commit();
+
     }
 
     private void changeBottomuCtrlBarState(final int MODE)
@@ -369,17 +340,19 @@ public class RomuActivity extends Activity
                 }
                 else if(RomuService.ROMU_CONNECTED.equals(action))
                 {
-                    changeTopNavBar(TOP_NAV_BAR_CONNECTED);
+                    // Notify user that bluetooth device has disconnected.
+                    ImageView connectionView = (ImageView) findViewById(R.id.connection_indicator);
+                    connectionView.setImageResource(R.drawable.connected);
+                    connectionView.postInvalidate();
+                    Toast.makeText(RomuActivity.this, "Romu Connected", Toast.LENGTH_SHORT);
                 }
                 else if(RomuService.ROMU_DISCONNECTED.equals(action))
                 {
                     // Notify user that bluetooth device has disconnected.
                     ImageView connectionView = (ImageView) findViewById(R.id.connection_indicator);
-                    if(connectionView != null)
-                    {
-                        connectionView.setImageResource(R.drawable.disconnected);
-                        connectionView.postInvalidate();
-                    }
+                    connectionView.setImageResource(R.drawable.disconnected);
+                    connectionView.postInvalidate();
+                    Toast.makeText(RomuActivity.this, "Romu Disconnected", Toast.LENGTH_SHORT);
                 }
                 else if(RomuService.ROMU_WRONG.equals(action))
                 {
@@ -505,20 +478,6 @@ public class RomuActivity extends Activity
 
         // Get current location's latitude and longitude.
         getRouteByRequestingGoogle(true);
-    }
-
-    /**
-     * Callback for connecting to found bluetooth device.
-     */
-    public void onConnect(View view)
-    {
-        if(romuService != null)
-        {
-            romuService.startBluetoothService();
-            changeTopNavBar(TOP_NAV_BAR_CONNECTING);
-        }
-        else
-            Toast.makeText(this, "Romu service is not ready yet", Toast.LENGTH_SHORT);
     }
 
     /**
@@ -773,10 +732,6 @@ public class RomuActivity extends Activity
 
         destAddrAutoCompleteTextView = (AutoCompleteTextView) findViewById(R.id.main_dest_addr);
         destAddrAutoCompleteTextView.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.list_item));
-        // Notify user that bluetooth device has connected, since Top Nav Bar
-        // is showed when device is firstly connected.
-        ImageView connectionView = (ImageView) findViewById(R.id.connection_indicator);
-        connectionView.setImageResource(R.drawable.connected);
     }
 
     // Communication with Romu service.
