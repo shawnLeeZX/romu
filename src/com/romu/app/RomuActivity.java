@@ -800,7 +800,9 @@ public class RomuActivity extends Activity
     {
 
         destAddrAutoCompleteTextView = (AutoCompleteTextView) findViewById(R.id.main_dest_addr);
-        destAddrAutoCompleteTextView.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.list_item));
+        destAddrAutoCompleteTextView.setAdapter(
+                new PlacesAutoCompleteAdapter(this, R.layout.list_item, R.id.item)
+                );
     }
 
     // Communication with Romu service.

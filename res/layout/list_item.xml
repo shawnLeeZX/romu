@@ -1,11 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- res/layout/list_item.xml -->
-
-<!-- Add padding for all text view. -->
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
-    android:singleLine="false"
-    android:layout_height="wrap_content"
-    android:background="#e2e2e2"
-    android:textColor="#000000"
-/>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width        = "match_parent"
+    android:layout_height       = "wrap_content"
+    android:orientation         = "vertical"
+    android:background      = "#e2e2e2"
+    >
+    <!-- Add padding for all text view. -->
+    <LinearLayout
+        android:layout_width        = "match_parent"
+        android:layout_height       = "wrap_content"
+        >
+        <ImageView
+            android:id              = "@+id/little_romu"
+            android:layout_width    = "wrap_content"
+            android:layout_height   = "wrap_content"
+            android:layout_centerVertical = "true"
+            android:src      = "@drawable/connected"
+            android:scaleType="fitXY"
+        />
+        <TextView 
+            android:id              = "@+id/item"
+            android:layout_width    = "0dp"
+            android:layout_height   = "wrap_content"
+            android:layout_weight   = "1"
+            android:singleLine      = "false"
+            android:textColor       = "#000000"
+        />
+    </LinearLayout>
+</LinearLayout>

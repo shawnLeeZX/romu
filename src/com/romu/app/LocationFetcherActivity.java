@@ -35,10 +35,14 @@ public class LocationFetcherActivity extends Activity
         setContentView(R.layout.address_fetcher);
 
         startAddrAutoCompleteTextView = (AutoCompleteTextView) findViewById(R.id.start_addr);
-        startAddrAutoCompleteTextView.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.list_item));
+        startAddrAutoCompleteTextView.setAdapter(
+                new PlacesAutoCompleteAdapter(this, R.layout.list_item, R.id.item)
+                );
 
         destAddrAutoCompleteTextView = (AutoCompleteTextView) findViewById(R.id.dest_addr);
-        destAddrAutoCompleteTextView.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.list_item));
+        destAddrAutoCompleteTextView.setAdapter(
+                new PlacesAutoCompleteAdapter(this, R.layout.list_item, R.id.item)
+                );
     }
 
     /**

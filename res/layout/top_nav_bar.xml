@@ -70,16 +70,17 @@
             /> 
 
             <AutoCompleteTextView
-                android:id="@+id/main_dest_addr"
-                android:layout_width="wrap_content"
-                android:layout_height="@dimen/top_textview"
-                android:layout_toLeftOf="@id/vertical_colorbar_intext"
-                android:layout_toRightOf="@id/search_leftimg" 
-                android:layout_centerVertical="true"
-                android:completionThreshold = "5"
-                android:hint="@string/dest_addr"
-                android:background="#e2e2e2"
-                android:textColor="#000000"
+                android:id              = "@+id/main_dest_addr"
+                android:layout_width    = "wrap_content"
+                android:layout_height   = "@dimen/top_textview"
+                android:layout_toLeftOf = "@id/vertical_colorbar_intext"
+                android:layout_toRightOf= "@id/search_leftimg" 
+                android:layout_centerVertical = "true"
+                android:singleLine      = "true"
+                android:completionThreshold     = "5"
+                android:hint            = "@string/dest_addr"
+                android:background      = "#e2e2e2"
+                android:textColor       = "#000000"
             />
 
                
