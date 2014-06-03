@@ -65,7 +65,7 @@ public class RomuService extends Service implements
     private static long updateScalar = 7000;
     private static long currentTime;
     private static long startTime;
-    private static boolean enoughTimeHasPassed=false;  
+    private static boolean enoughTimeHasPassed=false;
     private ArrayList<LatLng> waypoints = null;
     private static ArrayList<Location> progress;
     private int currentIndex;
@@ -461,6 +461,7 @@ public class RomuService extends Service implements
         assert currentRoute != null : "Route is null. Program should not reach here!";
         Log.i(LOG_TAG, "Navigation started.");
         listenToNavigationUpdates = true;
+        
         startTime = System.currentTimeMillis();
         finalDestination = makeLocation(currentRoute.getEndLocation());
         currentLocation = locationClient.getLastLocation();
@@ -680,7 +681,7 @@ public class RomuService extends Service implements
     {
         // Keep track of current location.
         currentLocation = location;
-        if(currentRoute != null)
+        if(listenToNavigationUpdates)
         {
             makeUseOfLocation(location);
         }
