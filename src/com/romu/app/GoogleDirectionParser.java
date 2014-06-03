@@ -166,11 +166,18 @@ public class GoogleDirectionParser
                 // Get the start position for this step and set it on the
                 // segment.
                 final JSONObject start = step.getJSONObject("start_location");
-                final LatLng position = new LatLng(
+                LatLng position = new LatLng(
                         start.getDouble("lat"),
                         start.getDouble("lng")
                   );
                 segment.setStart(position);
+
+                final JSONObject end = step.getJSONObject("end_location");
+                position = new LatLng(
+                        end.getDouble("lat"),
+                        end.getDouble("lng")
+                  );
+                segment.setEnd(position);
 
                 // Set the length of this segment in metres.
                 final int length = step.getJSONObject("distance").getInt("value");
@@ -182,7 +189,7 @@ public class GoogleDirectionParser
                 // Retrieve & decode this segment's polyline and add it to the
                 // route.
                 route.addPoints(
-                    decodePolyLine(
+                    Utilities.decodePolyLine(
                         step.getJSONObject("polyline").getString("points")
                         )
                     );
@@ -196,50 +203,4 @@ public class GoogleDirectionParser
         return route;
     }
 
-   /**
-    * Decode a polyline string into a list of LatLngs.
-    * 
-    * @param poly   polyline encoded string to decode.
-    * @return       the list of LatLngs represented by this polystring.
-    */
-    private ArrayList<LatLng> decodePolyLine(final String poly)
-    {
-        int len = poly.length();
-        int index = 0;
-        ArrayList<LatLng> decoded = new ArrayList<LatLng>();
-        int lat = 0;
-        int lng = 0;
-
-        while (index < len)
-        {
-            int b;
-            int shift = 0;
-            int result = 0;
-            do
-            {
-                b = poly.charAt(index++) - 63;
-                result |= (b & 0x1f) << shift;
-                shift += 5;
-            } while (b >= 0x20);
-            int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-            lat += dlat;
-
-            shift = 0;
-            result = 0;
-            do 
-            {
-                b = poly.charAt(index++) - 63;
-                result |= (b & 0x1f) << shift;
-                shift += 5;
-            } while (b >= 0x20);
-            int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
-            lng += dlng;
-
-            decoded.add(
-                    new LatLng((double)lat / 1E5, (double)lng / 1E5)
-                    );
-        }
-
-        return decoded;
-    }
 }

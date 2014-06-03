@@ -43,6 +43,9 @@ package com.romu.app;
 
 import java.net.MalformedURLException;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -116,6 +119,7 @@ public class RomuActivity extends Activity
     private String destAddr  = null;
     private Route currentRoute = null;
     private boolean isNavigationStopped;
+    private boolean romuConnected;
 
     // Interaction with Romu service.
     private BroadcastReceiver romuUpdateReciever = null;
@@ -125,6 +129,12 @@ public class RomuActivity extends Activity
 
     // Bluetooth related.
     private boolean bluetoothEnabled = false;
+
+    // For savedBundle.
+    private static final String CURRENT_ROUTE = "Current Route";
+    private static final String ROMU_BINDER = "Romu Bundle";
+    private static final String ROMU_CONNECTION_STATE = "Romu Connection Status";
+    private static final String NAVIGATION_STATUS = "Navigation Status";
 
     // Life Cycle
     // =====================================================================
@@ -139,16 +149,27 @@ public class RomuActivity extends Activity
 
         fragmentManager = getFragmentManager();
         broadcastManager = LocalBroadcastManager.getInstance(this);
-        isNavigationStopped = true;
+        if(savedInstanceState == null)
+        {
+            isNavigationStopped = true;
+            romuConnected = false;
+
+            Log.i(LOG_TAG, "Romu service initializing.");
+            initRomuService();
+        }
+        else
+        {
+            currentRoute = savedInstanceState.getParcelable(CURRENT_ROUTE);
+            isNavigationStopped = savedInstanceState.getBoolean(NAVIGATION_STATUS);
+            romuConnected = savedInstanceState.getBoolean(ROMU_CONNECTION_STATE);
+            bindRomuService();
+        }
 
         setContentView(R.layout.main);
 
-        Log.i(LOG_TAG, "Romu service initializing.");
-        initRomuService();
-
         initNavigationUI();
+        setUpMapIfNeeded();
 
-        renderMap();
         Log.i(LOG_TAG, "Map render finishes.");
 
         Log.i(LOG_TAG, "MainActivity initialized.");
@@ -169,6 +190,24 @@ public class RomuActivity extends Activity
     {
         super.onStart();
 
+        // Wait for some time to let map finish rendering.
+        Timer timer = new Timer();
+        TimerTask task = new TimerTask()
+        {
+            @Override
+            public void run()
+            {
+                runOnUiThread(new Runnable()
+                        {
+                            public void run()
+                                {
+                                    drawMapAndMoveCamera();
+                                }
+                        });
+            }
+        };
+        timer.schedule(task, 1000);
+
         // Set up map object if it is destroyed.
         setUpMapIfNeeded();
     }
@@ -179,7 +218,7 @@ public class RomuActivity extends Activity
     @Override
     protected void onPause()
     {
-        super.onStop();
+        super.onPause();
     }
 
     /**
@@ -188,11 +227,54 @@ public class RomuActivity extends Activity
     @Override
     protected void onDestroy()
     {
+        broadcastManager.unregisterReceiver(romuUpdateReciever);
+        unbindService(serviceConnection);
+        romuService = null;
         super.onDestroy();
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState)
+    {
+        // Save current route.
+        savedInstanceState.putParcelable(CURRENT_ROUTE, currentRoute);
+        // Save bindding to Romu service.
+        savedInstanceState.putBoolean(ROMU_CONNECTION_STATE, romuConnected);
+        savedInstanceState.putBoolean(NAVIGATION_STATUS, isNavigationStopped);
+
+        // Always call the superclass so it can save the view hierarchy state
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+
     // Private methods.
     // ========================================================================
+
+    private void drawMapAndMoveCamera()
+    {
+        if(currentRoute != null)
+        {
+            // Draw route on the map.
+            PolylineOptions routePolylineOptions = new PolylineOptions();
+            routePolylineOptions.addAll(currentRoute.getPoints());
+            map.addPolyline(routePolylineOptions);
+
+            // Draw marker on origin and destination.
+            map.addMarker(new MarkerOptions()
+                    .position(currentRoute.getStartLocation())
+                    .title(currentRoute.getStartAddr())
+                    );
+            map.addMarker(new MarkerOptions()
+                    .position(currentRoute.getEndLocation())
+                    .title(currentRoute.getDestAddr())
+                    );
+
+            // Set camera to the route.
+            // TODO: adjust the padding when refining.
+            // TODO: add animation when moving camera.
+            map.moveCamera(CameraUpdateFactory.newLatLngBounds(currentRoute.getBounds(), 200));
+        }
+    }
 
     /**
      * Do a null check to confirm that we have initiated the map.
@@ -216,6 +298,8 @@ public class RomuActivity extends Activity
             else
                 Log.i(LOG_TAG, "Successfully instantiate google map.");
         }
+
+        map.setMyLocationEnabled(true);
     }
 
     private void initNavigationUI()
@@ -288,20 +372,17 @@ public class RomuActivity extends Activity
 
     }
 
-    /**
-     * Initial rendering of Google Map at app startup.
-     */
-    private void renderMap()
-    {
-        setUpMapIfNeeded();
-        map.setMyLocationEnabled(true);
-    }
-
     private void initRomuService()
     {
         Intent romuServiceIntent = new Intent(this, RomuService.class);
         Log.i(LOG_TAG, "Starting Romu Service...");
         startService(romuServiceIntent);
+        bindRomuService();
+    }
+
+    private void bindRomuService()
+    {
+        Intent romuServiceIntent = new Intent(this, RomuService.class);
         // Connection with Romu service for better interface.
         serviceConnection = new ServiceConnection()
         {
@@ -321,6 +402,14 @@ public class RomuActivity extends Activity
             }
         };
 
+        registerRomuReceiver();
+
+        Log.i(LOG_TAG, "Binding romu service...");
+        bindService(romuServiceIntent, serviceConnection, BIND_AUTO_CREATE);
+    }
+
+    private void registerRomuReceiver()
+    {
         // BroadcastReceiver to receive updates broadcast from Romu service.
         romuUpdateReciever = new BroadcastReceiver()
         {
@@ -345,6 +434,7 @@ public class RomuActivity extends Activity
                     connectionView.setImageResource(R.drawable.connected);
                     connectionView.postInvalidate();
                     Toast.makeText(RomuActivity.this, "Romu Connected", Toast.LENGTH_SHORT);
+                    romuConnected = true;
                 }
                 else if(RomuService.ROMU_DISCONNECTED.equals(action))
                 {
@@ -353,6 +443,7 @@ public class RomuActivity extends Activity
                     connectionView.setImageResource(R.drawable.disconnected);
                     connectionView.postInvalidate();
                     Toast.makeText(RomuActivity.this, "Romu Disconnected", Toast.LENGTH_SHORT);
+                    romuConnected = false;
                 }
                 else if(RomuService.ROMU_WRONG.equals(action))
                 {
@@ -365,10 +456,6 @@ public class RomuActivity extends Activity
             }
         };
         broadcastManager.registerReceiver(romuUpdateReciever, romuUpdateIntentFilter());
-
-        Log.i(LOG_TAG, "Binding romu service...");
-        bindService(romuServiceIntent, serviceConnection, BIND_AUTO_CREATE);
-
     }
 
     private void stopRomuService()
@@ -578,28 +665,10 @@ public class RomuActivity extends Activity
         @Override
         protected void onPostExecute(Void result)
         {
-            // Draw route on the map.
-            PolylineOptions routePolylineOptions = new PolylineOptions();
-            routePolylineOptions.addAll(currentRoute.getPoints());
-            map.addPolyline(routePolylineOptions);
+            drawMapAndMoveCamera();
 
-            // Draw marker on origin and destination.
-            map.addMarker(new MarkerOptions()
-                    .position(currentRoute.getStartLocation())
-                    .title(currentRoute.getStartAddr())
-                    );
-            map.addMarker(new MarkerOptions()
-                    .position(currentRoute.getEndLocation())
-                    .title(currentRoute.getDestAddr())
-                    );
-
-            // Set camera to the route.
-            // TODO: adjust the padding when refining.
-            // TODO: add animation when moving camera.
-            map.moveCamera(CameraUpdateFactory.newLatLngBounds(currentRoute.getBounds(), 0));
-
-            // Close the keyboard automatically.
-            InputMethodManager im = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            InputMethodManager im = (InputMethodManager)
+                getSystemService(Context.INPUT_METHOD_SERVICE); 
             im.hideSoftInputFromWindow(destAddrAutoCompleteTextView.getWindowToken(), 0);
 
             // Pass the new route to Romu service.

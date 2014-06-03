@@ -1,5 +1,8 @@
 package com.romu.app;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.android.gms.maps.model.LatLng;
 
 /**
@@ -10,7 +13,7 @@ import com.google.android.gms.maps.model.LatLng;
  *
  * @author Shawn
  */
-public class Segment
+public class Segment implements Parcelable
 {
     // Geographical points in this segment.
     private LatLng start;
@@ -23,6 +26,20 @@ public class Segment
     * Create an empty segment.
     */
     public Segment() {}
+
+    public Segment(Parcel in)
+    {
+        start = new LatLng(
+                in.readDouble(),
+                in.readDouble()
+                );
+        end = new LatLng(
+                in.readDouble(),
+                in.readDouble()
+                );
+        instruction = in.readString();
+        length = in.readInt();
+    }
 
     /**
     * Set the turn instruction.
@@ -74,4 +91,41 @@ public class Segment
         this.length = length;
     }
 
+    // For parcelable.
+    // ====================================================================
+    @Override
+    public int describeContents()
+    {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags)
+    {
+        dest.writeDouble(start.latitude);
+        dest.writeDouble(start.longitude);
+        dest.writeDouble(end.latitude);
+        dest.writeDouble(end.longitude);
+
+        dest.writeString(instruction);
+        dest.writeInt(length);
+    }
+
+    /**
+     * It will be required during un-marshaling data stored in a Parcel.
+     */
+    public class SegmentCreator implements Parcelable.Creator<Segment>
+    {
+        @Override
+        public Segment createFromParcel(Parcel source)
+        {
+            return new Segment(source);
+        }
+
+        @Override
+        public Segment[] newArray(int size)
+        {
+            return new Segment[size];
+        }
+    }
 }
