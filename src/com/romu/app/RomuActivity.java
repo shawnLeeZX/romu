@@ -82,7 +82,8 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 public class RomuActivity extends Activity
-    implements TopNavBarFragment.TopNavBarAttachedListener
+    implements TopNavBarFragment.TopNavBarAttachedListener,
+               BottomCtrlBarFragment.BottomCtrlBarAttachedListener
 {
     public static final String LOG_TAG = "Romu: RomuActivity";
 
@@ -344,7 +345,14 @@ public class RomuActivity extends Activity
             case BOTTOM_CTRL_NAVIGATION_PAUSE:
                 {
                     ImageButton stateButton = (ImageButton) findViewById(R.id.state_button);
-                    stateButton.setBackgroundResource(R.drawable.play);
+                    if(romuConnected)
+                    {
+                    }
+                    else
+                    {
+                        stateButton.setBackgroundResource(R.drawable.cannot_play);
+                        stateButton.setEnabled(false);
+                    }
                     stateButton.postInvalidate();
                     break;
                 }
@@ -801,6 +809,11 @@ public class RomuActivity extends Activity
         destAddrAutoCompleteTextView.setAdapter(
                 new PlacesAutoCompleteAdapter(this, R.layout.list_item, R.id.item)
                 );
+    }
+
+    public void onBottomCtrlBarAttached()
+    {
+        changeBottomuCtrlBarState(BOTTOM_CTRL_NAVIGATION_PAUSE);
     }
 
     // Communication with Romu service.
