@@ -297,8 +297,8 @@ public class RomuService extends Service implements
         
         
         //increment segment is boolean : false if next destination is final
-        if(currentRoute.incrementSegment())
-            currentDestination = currentRoute.getCurrentDesination();
+        if(currentRoute.incrementCurrentSegment())
+            currentDestination = makeLocation(currentRoute.getCurrentDestination());
         else currentDestination = finalDestination;
         //int currentIndex = currentRoute.getCurrentIndex();
         //broadcastUpdate(ARRIVED_CURRENT, currentRoute);
@@ -309,13 +309,18 @@ public class RomuService extends Service implements
 
 
 
-    private Location makeLocation(LatLng ll){
+    private Location makeLocation(LatLng ll)
+    {
         Location location = new Location("");
         location.setLatitude(ll.latitude);
         location.setLongitude(ll.longitude);
         return location;
     }
 
+    private void sendCommand(String command)
+    {
+        btService.sendCommand(command);
+    }
 
     private void makeForegroundService()
     {
@@ -461,7 +466,7 @@ public class RomuService extends Service implements
         currentLocation = locationClient.getLastLocation();
         waypoints = currentRoute.getPoints();
         sendCommand(BEGIN_NAV_COMMAND);
-        currentDestination = currentRoute.getCurrentDesination();         
+        currentDestination = makeLocation(currentRoute.getCurrentDestination());
         listenTimeInterval = 1000;
     }
 
@@ -566,13 +571,13 @@ public class RomuService extends Service implements
     private void broadcastUpdate(final String action)
     {
         final Intent intent = new Intent(action);
-        sendBroadcast(intent);
+        broadcastManager.sendBroadcast(intent);
     }
 
     private void broadcastUpdate(final String action, String extra){
         final Intent intent = new Intent(action);
         intent.putExtra(EXTRA_DATA, extra);
-        sendBroadcast(intent);
+        broadcastManager.sendBroadcast(intent);
     }
 
 

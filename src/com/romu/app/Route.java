@@ -29,6 +29,8 @@ public class Route
     private LatLngBounds bounds;
 
     private final ArrayList<Segment> segments;
+    private int currentSegment;
+    private int segmentNum;
 
     // The polyline to draw on the Google Map is encoded in string. It needs
     // decoding to get the list of points.
@@ -40,6 +42,26 @@ public class Route
     {
         segments = new ArrayList<Segment>();
         points = new ArrayList<LatLng>();
+        currentSegment = 0;
+        segmentNum = segments.size();
+    }
+
+    public LatLng getCurrentDestination()
+    {
+        return points.get(currentSegment + 1);
+    }
+
+    public boolean incrementCurrentSegment()
+    {
+        if(segmentNum >= segmentNum - 1)
+        {
+            return false;
+        }
+        else
+        {
+            currentSegment++;
+            return true;
+        }
     }
 
     public void addPoint(final LatLng p)

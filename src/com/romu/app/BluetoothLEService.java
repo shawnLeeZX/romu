@@ -249,18 +249,21 @@ public class BluetoothLEService extends Service implements LeScanCallback
      *
      * @return  boolean Whether write is successfully began.
      */
-    public boolean sendCommand(String command)
+    public void sendCommand(String command)
     {
-        if(connectionState == STATE_READY)
+        // User may turn off bluetooth some time, do the check again.
+        // If bluetooth is not ready, just ignore the command.
+        if(bluetoothAdapter == null)
+        {
+            broadcastUpdate(ACTION_BLUETOOTH_NOT_ENABLED);
+        }
+        else if(connectionState == STATE_READY)
         {
             Log.i(LOG_TAG, "Writing: " + command);
             final byte[] bytes = command.getBytes();
             characteristicTx.setValue(bytes);
             bluetoothGatt.writeCharacteristic(characteristicTx);
-            return true;
         }
-
-        return false;
     }
 
     // Service related.
