@@ -509,6 +509,12 @@ public class RomuActivity extends Activity
                             Toast.LENGTH_SHORT
                             );
                 }
+                else if(RomuService.ARRIVED_FINAL.equals(action))
+                {
+                    Log.i(LOG_TAG, "Destination arrived.");
+                    updateBottomCtrlBarState(BOTTOM_CTRL_NAVIGATION_STOP);
+                    isNavigationStopped = true;
+                }
             }
         };
         broadcastManager.registerReceiver(romuUpdateReciever, romuUpdateIntentFilter());
@@ -914,6 +920,7 @@ public class RomuActivity extends Activity
         intentFilter.addAction(RomuService.DEVICE_FOUND);
         intentFilter.addAction(RomuService.ACTION_BT_NOT_ENABLED);
         intentFilter.addAction(RomuService.ROMU_NAVIGATION_STATE_CHANGE);
+        intentFilter.addAction(RomuService.ARRIVED_FINAL);
 
         return intentFilter;
     }
