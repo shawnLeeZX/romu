@@ -163,7 +163,9 @@ public class RomuActivity extends Activity
             currentRoute = savedInstanceState.getParcelable(CURRENT_ROUTE);
             isNavigationStopped = savedInstanceState.getBoolean(NAVIGATION_STATUS);
             romuConnected = savedInstanceState.getBoolean(ROMU_CONNECTION_STATE);
-            bindRomuService();
+
+            Intent romuServiceIntent = new Intent(this, RomuService.class);
+            bindRomuService(romuServiceIntent);
         }
 
         setContentView(R.layout.main);
@@ -397,12 +399,11 @@ public class RomuActivity extends Activity
         Intent romuServiceIntent = new Intent(this, RomuService.class);
         Log.i(LOG_TAG, "Starting Romu Service...");
         startService(romuServiceIntent);
-        bindRomuService();
+        bindRomuService(romuServiceIntent);
     }
 
-    private void bindRomuService()
+    private void bindRomuService(Intent romuServiceIntent)
     {
-        Intent romuServiceIntent = new Intent(this, RomuService.class);
         // Connection with Romu service for better interface.
         serviceConnection = new ServiceConnection()
         {
@@ -482,10 +483,6 @@ public class RomuActivity extends Activity
 
     private void stopRomuService()
     {
-        broadcastManager.unregisterReceiver(romuUpdateReciever);
-        unbindService(serviceConnection);
-        romuService = null;
-
         Intent romuServiceIntent = new Intent(this, RomuService.class);
         stopService(romuServiceIntent);
     }
