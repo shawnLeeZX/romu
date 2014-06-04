@@ -42,6 +42,11 @@ public class GetInfoActivity extends Activity
 
         // TODO: add input verification.
         macAddrTextField = (EditText) findViewById(R.id.mac_addr);
+        String macAddress = sharedPref.getString(
+                getString(R.string.mac_address),
+                null
+                );
+        macAddrTextField.setText(macAddress);
     }
 
 
