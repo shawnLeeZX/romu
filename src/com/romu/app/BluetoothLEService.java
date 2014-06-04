@@ -110,11 +110,11 @@ public class BluetoothLEService extends Service implements LeScanCallback
                 Context.MODE_PRIVATE
                 );
         // Uncomment this when finishing debugging.
-        macAddress = "20:CD:39:9E:F1:40";
-        // macAddress = sharedPref.getString(
-                // getString(R.string.mac_address),
-                // null
-                // );
+        // macAddress = "20:CD:39:9E:F1:40";
+        macAddress = sharedPref.getString(
+                getString(R.string.mac_address),
+                null
+                );
         Log.i(LOG_TAG, "Mac Address Read: " + macAddress + ".");
 
         connectionState = STATE_DISCONNECTED;
