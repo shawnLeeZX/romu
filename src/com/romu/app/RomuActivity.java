@@ -291,10 +291,13 @@ public class RomuActivity extends Activity
                 Log.i(LOG_TAG, "Failed to instantiate google map");
                 // TODO: Give prompt to let user fix the problem to let the map
                 // running. For instance, enable network.
+                return;
             }
             else
                 Log.i(LOG_TAG, "Successfully instantiate google map.");
         }
+
+        map.setMyLocationEnabled(true);
     }
 
     private void initNavigationUI()
@@ -626,7 +629,7 @@ public class RomuActivity extends Activity
             }
 
             // If current location is unavailable, we just ignore.
-            LatLng currentLatLng = romuService.getCurrentLatLgn();
+            LatLng currentLatLng = romuService.getCurrentLatLng();
             if(currentLatLng == null)
                 return;
 
@@ -791,6 +794,23 @@ public class RomuActivity extends Activity
     {
         stopRomuService();
         finish();
+    }
+
+    public void onToMyLocation(View view)
+    {
+        if(romuService == null)
+        {
+            Toast.makeText(this, "Romu service is not ready.", Toast.LENGTH_SHORT).show();
+        }
+        else
+        {
+            LatLng currentLatLng = romuService.getCurrentLatLng();
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(
+                        currentLatLng, 15
+                        ));
+        }
+
+
     }
 
     public void onConnect(View view)

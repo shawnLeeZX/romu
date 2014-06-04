@@ -436,7 +436,7 @@ public class RomuService extends Service implements
         }
     }
 
-    public LatLng getCurrentLatLgn()
+    public LatLng getCurrentLatLng()
     {
         if(currentLocation == null)
         {
