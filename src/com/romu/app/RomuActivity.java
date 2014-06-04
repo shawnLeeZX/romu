@@ -256,6 +256,7 @@ public class RomuActivity extends Activity
             // Draw route on the map.
             PolylineOptions routePolylineOptions = new PolylineOptions();
             routePolylineOptions.addAll(currentRoute.getPoints());
+            map.clear();
             map.addPolyline(routePolylineOptions);
 
             // Draw marker on origin and destination.
