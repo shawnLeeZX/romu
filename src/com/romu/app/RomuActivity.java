@@ -90,10 +90,6 @@ public class RomuActivity extends Activity
     // UI.
     private FragmentManager fragmentManager;
     private AutoCompleteTextView destAddrAutoCompleteTextView;
-    // State of UI of top navigation bar.
-    private static final int TOP_NAV_BAR_INIT = 0;
-    private static final int TOP_NAV_BAR_CONNECTING = 1;
-    private static final int TOP_NAV_BAR_CONNECTED = 2;
     // State of UI of bottom control bar.
     private static final int BOTTOM_CTRL_NAVIGATION_INIT = 0;
     private static final int BOTTOM_CTRL_IN_NAVIGATING = 1;
