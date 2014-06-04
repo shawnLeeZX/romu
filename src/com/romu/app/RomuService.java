@@ -61,7 +61,7 @@ public class RomuService extends Service implements
     private Route currentRoute;
     private boolean listenToNavigationUpdates = false;
     private static long updateFrequencyDefault = 17000;
-    private static long listenTimeInterval = 5000;
+    private static long listenTimeInterval = 10000;
     private static long updateScalar = 7000;
     private static long currentTime;
     private static long startTime;
@@ -75,8 +75,8 @@ public class RomuService extends Service implements
     private static final double GPS_RADIUS = 35;
     private int deltaOn = 0;
     private int distanceOn = 1;
-    private int thresholdForLost =30;
-    private static final long locationUpdateInterval = 7000;
+    private int thresholdForLost =50;
+    private static final long locationUpdateInterval = 10000;
 
     //Navigation commands
     public static final String PAUSE_NAV_COMMAND = "#6#1#";
@@ -218,6 +218,7 @@ public class RomuService extends Service implements
             }
             if(enoughTimeHasPassed || command.equals(ARRIVED_FINAL)){
                 enoughTimeHasPassed=false;
+                listenTimeInterval = updateFrequencyDefault;
                 sendCommand(command);
             }
         }
@@ -276,7 +277,7 @@ public class RomuService extends Service implements
         if(currentBearing>0.0){
             delta = headingToDestination - currentBearing;
             if(delta<0)delta+=360;
-            if(delta>thresholdForLost){
+            if(delta>thresholdForLost && delta<(360-thresholdForLost){
                 distanceOn = 0;
                 deltaOn = 1;
                 double deltaScalar = 180-delta;
@@ -303,7 +304,7 @@ public class RomuService extends Service implements
         else currentDestination = finalDestination;
         //int currentIndex = currentRoute.getCurrentIndex();
         //broadcastUpdate(ARRIVED_CURRENT, currentRoute);
-        listenTimeInterval = 500;
+        listenTimeInterval = 1000;
     }
 
 
