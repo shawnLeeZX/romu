@@ -125,14 +125,12 @@ public class RomuActivity extends Activity
     private ServiceConnection serviceConnection = null; 
     private RomuService romuService = null;
     private LocalBroadcastManager broadcastManager;
-    private Context context;
 
     // Bluetooth related.
     private boolean bluetoothEnabled = false;
 
     // For savedBundle.
     private static final String CURRENT_ROUTE = "Current Route";
-    private static final String ROMU_BINDER = "Romu Bundle";
     private static final String ROMU_CONNECTION_STATE = "Romu Connection Status";
     private static final String NAVIGATION_STATUS = "Navigation Status";
 
@@ -150,7 +148,6 @@ public class RomuActivity extends Activity
         fragmentManager = getFragmentManager();
         broadcastManager = LocalBroadcastManager.getInstance(this);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        context = this;
         if(savedInstanceState == null)
         {
             isNavigationStopped = true;
@@ -465,6 +462,14 @@ public class RomuActivity extends Activity
                 if(RomuService.ACTION_BT_NOT_ENABLED.equals(action))
                 {
                     enableBluetooth();
+                }
+                else if(RomuService.ROMU_NAVIGATION_STATE_CHANGE.equals(action))
+                {
+                    // The user is going to pause or start the navigation.
+                    // Since the signal is from Romu Service, which will handle
+                    // the actual start or stop of navigation, activity only
+                    // update UI.
+                    onNavigationStateChange(null);
                 }
                 else if(RomuService.DEVICE_FOUND.equals(action))
                 {
@@ -905,16 +910,9 @@ public class RomuActivity extends Activity
         intentFilter.addAction(RomuService.ROMU_CONNECTED);
         intentFilter.addAction(RomuService.ROMU_DISCONNECTED);
         intentFilter.addAction(RomuService.ROMU_WRONG);
-        // intentFilter.addAction(RomuService.BEGIN_NAVIGATION);
         intentFilter.addAction(RomuService.DEVICE_FOUND);
         intentFilter.addAction(RomuService.ACTION_BT_NOT_ENABLED);
-        // intentFilter.addAction(RomuService.STOP_NAVIGATION);
-        // intentFilter.addAction(RomuService.PAUSE_NAVIGATION);
-        // intentFilter.addAction(RomuService.NAVIGATION_COMPLETE);
-        // intentFilter.addAction(RomuService.LOCATION_SERVICE_CONNECTION_FAIL);
-        // intentFilter.addAction(RomuService.DEVICE_SERVICES_DISCOVERED);
-        // intentFilter.addAction(RomuService.LOCATION_CONNECTION_SUCCESS);
-        // intentFilter.addAction(RomuService.LOCATION_SERVICE_DISCONNECTED);
+        intentFilter.addAction(RomuService.ROMU_NAVIGATION_STATE_CHANGE);
 
         return intentFilter;
     }

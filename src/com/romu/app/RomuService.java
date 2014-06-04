@@ -102,6 +102,8 @@ public class RomuService extends Service implements
         "com.romu.app.ROMU_DISCONNECTED";
     public static final String ROMU_WRONG = 
         "com.romu.app.ROMU_WRONG";
+    public static final String ROMU_NAVIGATION_STATE_CHANGE = 
+        "com.romu.app.ROMU_NAVIGATION_STATE_CHANGE";
     public static final String EXTRA_DATA = 
          "com.romu.app.EXTRA_DATA";
 
@@ -528,6 +530,14 @@ public class RomuService extends Service implements
                     else if(action == BluetoothLEService.ACTION_GATT_WRONG)
                     {
                         broadcastUpdate(ROMU_WRONG);
+                    }
+                    else if(action == BluetoothLEService.ACTION_DATA_AVAILABLE)
+                    {
+                        if(listenToNavigationUpdates)
+                            stopNavigation();
+                        else
+                            startNavigation();
+                        broadcastUpdate(ROMU_NAVIGATION_STATE_CHANGE);
                     }
                 }
             };
