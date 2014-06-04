@@ -321,7 +321,19 @@ public class RomuActivity extends Activity
 
     }
 
-    private void changeBottomuCtrlBarState(final int MODE)
+    private void updateConnectionIndicator()
+    {
+        ImageView connectionView = (ImageView) findViewById(R.id.connection_indicator);
+
+        if(romuConnected)
+            connectionView.setImageResource(R.drawable.connected);
+        else
+            connectionView.setImageResource(R.drawable.disconnected);
+
+        connectionView.postInvalidate();
+    }
+
+    private void updateBottomCtrlBarState(final int MODE)
     {
         FragmentTransaction ft = fragmentManager.beginTransaction();
         Fragment fragment = null;
@@ -347,6 +359,8 @@ public class RomuActivity extends Activity
                     ImageButton stateButton = (ImageButton) findViewById(R.id.state_button);
                     if(romuConnected)
                     {
+                        stateButton.setBackgroundResource(R.drawable.play);
+                        stateButton.setEnabled(true);
                     }
                     else
                     {
@@ -436,20 +450,22 @@ public class RomuActivity extends Activity
                 else if(RomuService.ROMU_CONNECTED.equals(action))
                 {
                     // Notify user that bluetooth device has disconnected.
-                    ImageView connectionView = (ImageView) findViewById(R.id.connection_indicator);
-                    connectionView.setImageResource(R.drawable.connected);
-                    connectionView.postInvalidate();
                     Toast.makeText(RomuActivity.this, "Romu Connected", Toast.LENGTH_SHORT);
                     romuConnected = true;
+                    updateConnectionIndicator();
+                    if(findViewById(R.id.state_button) != null)
+                    {
+                        updateBottomCtrlBarState(BOTTOM_CTRL_NAVIGATION_PAUSE);
+                    }
                 }
                 else if(RomuService.ROMU_DISCONNECTED.equals(action))
                 {
                     // Notify user that bluetooth device has disconnected.
-                    ImageView connectionView = (ImageView) findViewById(R.id.connection_indicator);
-                    connectionView.setImageResource(R.drawable.disconnected);
-                    connectionView.postInvalidate();
                     Toast.makeText(RomuActivity.this, "Romu Disconnected", Toast.LENGTH_SHORT);
                     romuConnected = false;
+                    updateConnectionIndicator();
+                    updateBottomCtrlBarState(BOTTOM_CTRL_NAVIGATION_PAUSE);
+                    romuService.stopNavigation();
                 }
                 else if(RomuService.ROMU_WRONG.equals(action))
                 {
@@ -537,13 +553,13 @@ public class RomuActivity extends Activity
             if(isNavigationStopped)
             {
                 romuService.startNavigation();
-                changeBottomuCtrlBarState(BOTTOM_CTRL_IN_NAVIGATING);
+                updateBottomCtrlBarState(BOTTOM_CTRL_IN_NAVIGATING);
                 isNavigationStopped = false;
             }
             else
             {
                 romuService.stopNavigation();
-                changeBottomuCtrlBarState(BOTTOM_CTRL_NAVIGATION_PAUSE);
+                updateBottomCtrlBarState(BOTTOM_CTRL_NAVIGATION_PAUSE);
                 isNavigationStopped = true;
             }
         }
@@ -572,16 +588,6 @@ public class RomuActivity extends Activity
         // Get current location's latitude and longitude.
         getRouteByRequestingGoogle(true);
 
-        InputMethodManager im = (InputMethodManager)
-            getSystemService(Context.INPUT_METHOD_SERVICE); 
-        im.hideSoftInputFromWindow(destAddrAutoCompleteTextView.getWindowToken(), 0);
-
-        // Pass the new route to Romu service.
-        romuService.setRoute(currentRoute);
-
-        // Pop up the bottom control pane.
-        changeBottomuCtrlBarState(BOTTOM_CTRL_NAVIGATION_INIT);
-        isNavigationStopped = false;
     }
 
     /**
@@ -597,7 +603,7 @@ public class RomuActivity extends Activity
                 "Romu service should not be null when trying to stop navigation.";
 
         romuService.stopNavigation();
-        changeBottomuCtrlBarState(BOTTOM_CTRL_NAVIGATION_STOP);
+        updateBottomCtrlBarState(BOTTOM_CTRL_NAVIGATION_STOP);
         isNavigationStopped = true;
     }
 
@@ -683,6 +689,16 @@ public class RomuActivity extends Activity
         protected void onPostExecute(Void result)
         {
             drawMapAndMoveCamera();
+
+            InputMethodManager im = (InputMethodManager)
+                getSystemService(Context.INPUT_METHOD_SERVICE); 
+            im.hideSoftInputFromWindow(destAddrAutoCompleteTextView.getWindowToken(), 0);
+
+            // Pass the new route to Romu service.
+            romuService.setRoute(currentRoute);
+
+            // Pop up the bottom control pane.
+            updateBottomCtrlBarState(BOTTOM_CTRL_NAVIGATION_INIT);
         }
 
         /**
@@ -766,7 +782,7 @@ public class RomuActivity extends Activity
 
     public void onShowInfo(View view)
     {
-        changeBottomuCtrlBarState(BOTTOM_CTRL_INFO);
+        updateBottomCtrlBarState(BOTTOM_CTRL_INFO);
     }
 
     // General UI.
@@ -809,11 +825,12 @@ public class RomuActivity extends Activity
         destAddrAutoCompleteTextView.setAdapter(
                 new PlacesAutoCompleteAdapter(this, R.layout.list_item, R.id.item)
                 );
+        updateConnectionIndicator();
     }
 
     public void onBottomCtrlBarAttached()
     {
-        changeBottomuCtrlBarState(BOTTOM_CTRL_NAVIGATION_PAUSE);
+        updateBottomCtrlBarState(BOTTOM_CTRL_NAVIGATION_PAUSE);
     }
 
     // Communication with Romu service.

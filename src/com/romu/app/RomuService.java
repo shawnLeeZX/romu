@@ -565,7 +565,7 @@ public class RomuService extends Service implements
     public void setRoute(Route route)
     {
         currentRoute = route;
-
+        Log.d(LOG_TAG, currentRoute.toString());
     }
 
     // Communication with RomuActivity.
