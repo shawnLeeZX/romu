@@ -118,6 +118,7 @@ public class RomuActivity extends Activity
     private Route currentRoute = null;
     private boolean isNavigationStopped;
     private boolean romuConnected;
+    private boolean infoShowed;
 
     // Interaction with Romu service.
     private BroadcastReceiver romuUpdateReciever = null;
@@ -384,16 +385,31 @@ public class RomuActivity extends Activity
                     ft.commit();
                     break;
                 }
-            case BOTTOM_CTRL_INFO:
-                {
-                    fragment = new BottomInfoFragment();
-                    ft.replace(R.id.bottom_ctrl_bar_placeholder, fragment);
-                    ft.addToBackStack(null);
-                    ft.commit();
-                    break;
-                }
             default:
                 Log.w(LOG_TAG, "Bottom control bar state out of range.");
+        }
+
+
+    }
+
+    private void switchBottomInfoBarState()
+    {
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        Fragment fragment = null;
+
+        if(infoShowed)
+        {
+            fragment = fragmentManager.findFragmentById(R.id.bottom_info);
+            ft.remove(fragment);
+            ft.commit();
+            infoShowed = false;
+        }
+        else
+        {
+            fragment = new BottomInfoFragment();
+            ft.add(R.id.bottom_info, fragment);
+            ft.commit();
+            infoShowed = true;
         }
 
 
@@ -703,6 +719,7 @@ public class RomuActivity extends Activity
             romuService.setRoute(currentRoute);
 
             // Pop up the bottom control pane.
+            infoShowed = false;
             updateBottomCtrlBarState(BOTTOM_CTRL_NAVIGATION_INIT);
         }
 
@@ -787,7 +804,7 @@ public class RomuActivity extends Activity
 
     public void onShowInfo(View view)
     {
-        updateBottomCtrlBarState(BOTTOM_CTRL_INFO);
+        switchBottomInfoBarState();
     }
 
     // General UI.
@@ -864,7 +881,10 @@ public class RomuActivity extends Activity
 
     public void onBottomCtrlBarAttached()
     {
-        updateBottomCtrlBarState(BOTTOM_CTRL_NAVIGATION_PAUSE);
+        if(isNavigationStopped)
+            updateBottomCtrlBarState(BOTTOM_CTRL_NAVIGATION_PAUSE);
+        else
+            updateBottomCtrlBarState(BOTTOM_CTRL_IN_NAVIGATING);
     }
 
     // Communication with Romu service.
