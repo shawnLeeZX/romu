@@ -263,13 +263,14 @@ public class RomuService extends Service implements
             String action = ARRIVED_CURRENT;
             if(currentDestination.equals(finalDestination)){
                 action = ARRIVED_FINAL;
-                String arrived = ARRIVED_FINAL_COMMAND;
+                String arrived = BEGIN_NAV_COMMAND;
                 writeUpdate(action, arrived);
                 stopNavigation();
                 broadcastUpdate(ARRIVED_FINAL);
                 return;
             }else{
                 String currentArrived = ARRIVED_CURRENT_COMMAND;
+                broadcastUpdate(ARRIVED_CURRENT);
                 writeUpdate(action, currentArrived);
                 updateCurrentDestination();
                 return;
