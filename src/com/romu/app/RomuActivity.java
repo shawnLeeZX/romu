@@ -836,23 +836,8 @@ public class RomuActivity extends Activity
         destAddrAutoCompleteTextView.setAdapter(
                 new PlacesAutoCompleteAdapter(this, R.layout.list_item, R.id.item)
                 );
-        // Wait for some time to let map finish rendering.
-        Timer timer = new Timer();
-        TimerTask task = new TimerTask()
-        {
-            @Override
-            public void run()
-            {
-                runOnUiThread(new Runnable()
-                        {
-                            public void run()
-                                {
-                                    updateConnectionIndicator();
-                                }
-                        });
-            }
-        };
-        timer.schedule(task, 1000);
+
+        updateConnectionIndicator();
     }
 
     public void onBottomCtrlBarAttached()
