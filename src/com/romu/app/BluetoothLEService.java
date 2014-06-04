@@ -330,7 +330,7 @@ public class BluetoothLEService extends Service implements LeScanCallback
      *          BluetoothGattCallback#onConnectionStateChange(android.bluetooth.BluetoothGatt,
      *          int, int)} callback.
      */
-    public boolean connect(final String address)
+    private boolean connect(final String address)
     {
         if (address == null)
         {
@@ -372,6 +372,16 @@ public class BluetoothLEService extends Service implements LeScanCallback
         Log.i(LOG_TAG, "Trying to create a new connection.");
         macAddress = address;
         connectionState = STATE_CONNECTING;
+        return true;
+    }
+
+    public boolean connect()
+    {
+        if(connectionState == STATE_DISCONNECTED)
+        {
+            return connect(macAddress);
+        }
+
         return true;
     }
 

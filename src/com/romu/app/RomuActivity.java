@@ -295,8 +295,6 @@ public class RomuActivity extends Activity
             else
                 Log.i(LOG_TAG, "Successfully instantiate google map.");
         }
-
-        map.setMyLocationEnabled(true);
     }
 
     private void initNavigationUI()
@@ -793,6 +791,17 @@ public class RomuActivity extends Activity
     {
         stopRomuService();
         finish();
+    }
+
+    public void onConnect(View view)
+    {
+        if(romuService != null)
+        {
+            if(!romuService.connect())
+            {
+                Toast.makeText(this, "Cannot connect to device", Toast.LENGTH_SHORT);
+            }
+        }
     }
 
     // Show settings by left drawer when clicked.

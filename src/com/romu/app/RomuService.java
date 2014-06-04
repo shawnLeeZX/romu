@@ -562,6 +562,16 @@ public class RomuService extends Service implements
 
     }
 
+    public boolean connect()
+    {
+        if(btService != null)
+        {
+            return btService.connect();
+        }
+
+        return false;
+    }
+
     public void setRoute(Route route)
     {
         currentRoute = route;
