@@ -216,6 +216,7 @@ public class BluetoothLEService extends Service implements LeScanCallback
             public void onCharacteristicChanged(BluetoothGatt gatt,
                                                 BluetoothGattCharacteristic characteristic)
             {
+                Log.i(LOG_TAG, "Signal received from hardware.");
                 broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
             }
         };
