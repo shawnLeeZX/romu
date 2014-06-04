@@ -155,7 +155,11 @@ public class BluetoothLEService extends Service implements LeScanCallback
                     }
                 }
                 else
+                {
+                    Log.i(LOG_TAG, "Cannot find device. Do not try connecting.");
+                    bluetoothGatt.disconnect();
                     broadcastUpdate(ACTION_GATT_WRONG);
+                }
             }
 
             public void onReadRemoteRssi(BluetoothGatt gatt, int rssi, int status)

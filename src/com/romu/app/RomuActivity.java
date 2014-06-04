@@ -125,6 +125,7 @@ public class RomuActivity extends Activity
     private ServiceConnection serviceConnection = null; 
     private RomuService romuService = null;
     private LocalBroadcastManager broadcastManager;
+    private Context context;
 
     // Bluetooth related.
     private boolean bluetoothEnabled = false;
@@ -149,6 +150,7 @@ public class RomuActivity extends Activity
         fragmentManager = getFragmentManager();
         broadcastManager = LocalBroadcastManager.getInstance(this);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        context = this;
         if(savedInstanceState == null)
         {
             isNavigationStopped = true;
@@ -494,6 +496,7 @@ public class RomuActivity extends Activity
                 }
                 else if(RomuService.ROMU_WRONG.equals(action))
                 {
+                    Log.i(LOG_TAG, "Romu is not nearby or malfunctioning...");
                     Toast.makeText(
                             RomuActivity.this,
                             "Romu is not nearby or malfunctioning...",
@@ -834,11 +837,17 @@ public class RomuActivity extends Activity
 
     public void onConnect(View view)
     {
+        Log.i(LOG_TAG, "Try connecting romu...");
+        Toast.makeText(
+                this,
+                "Scanning and searching romu...",
+                Toast.LENGTH_LONG
+                );
         if(romuService != null)
         {
             if(!romuService.connect())
             {
-                Toast.makeText(this, "Cannot connect to device", Toast.LENGTH_SHORT);
+                Log.d(LOG_TAG, "Something wrong with bluetooth.");
             }
         }
     }
