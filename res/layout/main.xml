@@ -22,14 +22,23 @@
             android:layout_height = "wrap_content">
         </FrameLayout>
 
+        <!-- this relativelayout is for bottom info fragments-->
+        <FrameLayout
+            android:id = "@+id/bottom_info"
+            android:layout_width    = "match_parent"
+            android:layout_height   = "wrap_content"
+            android:layout_alignParentBottom = "true">
+        </FrameLayout>
+
         <!-- Placeholder for bottom control bar fragments. -->
         <FrameLayout
             android:id = "@+id/bottom_ctrl_bar_placeholder"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom = "true"
+            android:layout_above = "@id/bottom_info" 
         >
         </FrameLayout>
+
 
         <ImageButton
             android:id="@+id/button_drawer"
