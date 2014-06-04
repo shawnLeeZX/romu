@@ -324,9 +324,15 @@ public class RomuActivity extends Activity
         ImageView connectionView = (ImageView) findViewById(R.id.connection_indicator);
 
         if(romuConnected)
+        {
+            Log.d(LOG_TAG, "Make indicator show connected.");
             connectionView.setImageResource(R.drawable.connected);
+        }
         else
+        {
+            Log.d(LOG_TAG, "Make indicator show disconnected.");
             connectionView.setImageResource(R.drawable.disconnected);
+        }
 
         connectionView.postInvalidate();
     }
@@ -461,8 +467,11 @@ public class RomuActivity extends Activity
                     Toast.makeText(RomuActivity.this, "Romu Disconnected", Toast.LENGTH_SHORT);
                     romuConnected = false;
                     updateConnectionIndicator();
-                    updateBottomCtrlBarState(BOTTOM_CTRL_NAVIGATION_PAUSE);
-                    romuService.stopNavigation();
+                    if(!isNavigationStopped)
+                    {
+                        updateBottomCtrlBarState(BOTTOM_CTRL_NAVIGATION_PAUSE);
+                        romuService.stopNavigation();
+                    }
                 }
                 else if(RomuService.ROMU_WRONG.equals(action))
                 {
@@ -818,7 +827,23 @@ public class RomuActivity extends Activity
         destAddrAutoCompleteTextView.setAdapter(
                 new PlacesAutoCompleteAdapter(this, R.layout.list_item, R.id.item)
                 );
-        updateConnectionIndicator();
+        // Wait for some time to let map finish rendering.
+        Timer timer = new Timer();
+        TimerTask task = new TimerTask()
+        {
+            @Override
+            public void run()
+            {
+                runOnUiThread(new Runnable()
+                        {
+                            public void run()
+                                {
+                                    updateConnectionIndicator();
+                                }
+                        });
+            }
+        };
+        timer.schedule(task, 1000);
     }
 
     public void onBottomCtrlBarAttached()
