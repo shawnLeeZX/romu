@@ -72,11 +72,11 @@ public class RomuService extends Service implements
     private Location currentDestination;
     private Location finalDestination;
     private static final int TWO_MINUTES = 1000 * 60 * 2;
-    private static final double GPS_RADIUS = 35;
     private int deltaOn = 0;
     private int distanceOn = 1;
     private int thresholdForLost =50;
     private static final long locationUpdateInterval = 5000;
+    private static int currentDestinationRadius = 50;
 
     //Navigation commands
     public static final String PAUSE_NAV_COMMAND = "#6#1#";
@@ -218,7 +218,7 @@ public class RomuService extends Service implements
                     startTime = currentTime;
                     enoughTimeHasPassed = true;
             }
-            if(enoughTimeHasPassed || command.equals(ARRIVED_FINAL)){
+            if(enoughTimeHasPassed || action.equals(ARRIVED_FINAL) || action.equals(ARRIVED_CURRENT)){
                 enoughTimeHasPassed=false;
                 listenTimeInterval = updateFrequencyDefault;
                 sendCommand(command);
@@ -227,7 +227,12 @@ public class RomuService extends Service implements
         
     }
 
-
+    private double chooseRadius(float distanceTo){
+        if(distanceTo<=35)return 40;
+        if(distanceTo<=75)return 50;
+        if(distanceTo<=100)return 65;
+        return 75;
+    }
 
      /*
     Bulk of navigation computation. Uses the current location and 
@@ -236,6 +241,7 @@ public class RomuService extends Service implements
 
     */
     private void makeUseOfLocation(Location location){    
+       
         if(location== null)return; 
         Location lastKnownLocation = locationClient.getLastLocation();
         if(isBetterLocation(lastKnownLocation, currentLocation)){
@@ -248,17 +254,19 @@ public class RomuService extends Service implements
         if(headingToDestination<0)headingToDestination+=360;
         float currentBearing = location.getBearing();
         float distanceTo = location.distanceTo(currentDestination);
+        double gpsRadius = chooseRadius(distanceTo);
         if(distanceOn==1){
             double distanceScalar = chooseDistanceTier(distanceTo);
             updateFrequencyOfLocationUpdate(distanceScalar, 0);
         }
-        if(distanceTo <= location.getAccuracy()||distanceTo<=GPS_RADIUS){
+        if(distanceTo <= location.getAccuracy()||distanceTo<=gpsRadius){
             String action = ARRIVED_CURRENT;
             if(currentDestination.equals(finalDestination)){
                 action = ARRIVED_FINAL;
                 String arrived = ARRIVED_FINAL_COMMAND;
                 writeUpdate(action, arrived);
                 stopNavigation();
+                broadcastUpdate(ARRIVED_FINAL);
                 return;
             }else{
                 String currentArrived = ARRIVED_CURRENT_COMMAND;
@@ -306,7 +314,7 @@ public class RomuService extends Service implements
         else currentDestination = finalDestination;
         //int currentIndex = currentRoute.getCurrentIndex();
         //broadcastUpdate(ARRIVED_CURRENT, currentRoute);
-        listenTimeInterval = 1000;
+        listenTimeInterval = 500;
     }
 
 
@@ -472,7 +480,7 @@ public class RomuService extends Service implements
         waypoints = currentRoute.getPoints();
         sendCommand(BEGIN_NAV_COMMAND);
         currentDestination = makeLocation(currentRoute.getCurrentDestination());
-        listenTimeInterval = 1000;
+        listenTimeInterval = 300;
     }
 
 
