@@ -357,6 +357,7 @@ public class RomuActivity extends Activity
                 }
             case BOTTOM_CTRL_IN_NAVIGATING:
                 {
+                    Log.i(LOG_TAG, "Button Pause.");
                     ImageButton stateButton = (ImageButton) findViewById(R.id.state_button);
                     stateButton.setBackgroundResource(R.drawable.pause);
                     stateButton.postInvalidate();
@@ -365,6 +366,7 @@ public class RomuActivity extends Activity
             case BOTTOM_CTRL_NAVIGATION_PAUSE:
                 {
                     ImageButton stateButton = (ImageButton) findViewById(R.id.state_button);
+                    Log.i(LOG_TAG, "Button play.");
                     if(romuConnected)
                     {
                         stateButton.setBackgroundResource(R.drawable.play);
@@ -480,7 +482,7 @@ public class RomuActivity extends Activity
                 else if(RomuService.ROMU_CONNECTED.equals(action))
                 {
                     // Notify user that bluetooth device has disconnected.
-                    Toast.makeText(RomuActivity.this, "Romu Connected", Toast.LENGTH_SHORT);
+                    Toast.makeText(RomuActivity.this, "Romu Connected", Toast.LENGTH_SHORT).show();
                     romuConnected = true;
                     updateConnectionIndicator();
                     if(findViewById(R.id.state_button) != null)
@@ -491,7 +493,7 @@ public class RomuActivity extends Activity
                 else if(RomuService.ROMU_DISCONNECTED.equals(action))
                 {
                     // Notify user that bluetooth device has disconnected.
-                    Toast.makeText(RomuActivity.this, "Romu Disconnected", Toast.LENGTH_SHORT);
+                    Toast.makeText(RomuActivity.this, "Romu Disconnected", Toast.LENGTH_SHORT).show();
                     romuConnected = false;
                     updateConnectionIndicator();
                     if(!isNavigationStopped)
@@ -507,7 +509,7 @@ public class RomuActivity extends Activity
                             RomuActivity.this,
                             "Romu is not nearby or malfunctioning...",
                             Toast.LENGTH_SHORT
-                            );
+                            ).show();
                 }
                 else if(RomuService.ARRIVED_FINAL.equals(action))
                 {
@@ -849,12 +851,6 @@ public class RomuActivity extends Activity
 
     public void onConnect(View view)
     {
-        Log.i(LOG_TAG, "Try connecting romu...");
-        Toast.makeText(
-                this,
-                "Scanning and searching romu...",
-                Toast.LENGTH_LONG
-                );
         if(romuService != null)
         {
             if(!romuService.connect())

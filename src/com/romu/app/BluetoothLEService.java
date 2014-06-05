@@ -140,6 +140,7 @@ public class BluetoothLEService extends Service implements LeScanCallback
                                 // Attempts to discover services after successful connection.
                                 Log.i(LOG_TAG, "Attempting to start service discovery:" +
                                         bluetoothGatt.discoverServices());
+                                Toast.makeText(BluetoothLEService.this, "Bluetooth Connected.", Toast.LENGTH_SHORT).show();
                                 break;
                             }
                         case BluetoothProfile.STATE_DISCONNECTED:
@@ -148,6 +149,7 @@ public class BluetoothLEService extends Service implements LeScanCallback
                                 connectionState = STATE_DISCONNECTED;
                                 Log.i(LOG_TAG, "Disconnected from GATT server.");
                                 broadcastUpdate(intentAction);
+                                Toast.makeText(BluetoothLEService.this, "Bluetooth Disonnected.", Toast.LENGTH_SHORT).show();
                                 break;
                             }
                         default:
@@ -159,6 +161,7 @@ public class BluetoothLEService extends Service implements LeScanCallback
                     Log.i(LOG_TAG, "Cannot find device. Do not try connecting.");
                     bluetoothGatt.disconnect();
                     broadcastUpdate(ACTION_GATT_WRONG);
+                    connectionState = STATE_DISCONNECTED;
                 }
             }
 
@@ -221,7 +224,7 @@ public class BluetoothLEService extends Service implements LeScanCallback
             }
         };
 
-        connect(macAddress);
+        connect();
     }
 
     // Private methods.
@@ -359,6 +362,7 @@ public class BluetoothLEService extends Service implements LeScanCallback
             if (bluetoothGatt.connect())
             {
                 connectionState = STATE_CONNECTING;
+                stopTryingWhenCannotConnectLong();
                 return true;
             } else {
                 return false;
@@ -377,6 +381,7 @@ public class BluetoothLEService extends Service implements LeScanCallback
         Log.i(LOG_TAG, "Trying to create a new connection.");
         macAddress = address;
         connectionState = STATE_CONNECTING;
+        stopTryingWhenCannotConnectLong();
         return true;
     }
 
@@ -384,8 +389,19 @@ public class BluetoothLEService extends Service implements LeScanCallback
     {
         if(connectionState == STATE_DISCONNECTED)
         {
+            Toast.makeText(
+                    this,
+                    "Scanning and searching romu...",
+                    Toast.LENGTH_LONG
+                    ).show();
             return connect(macAddress);
         }
+        else
+            Toast.makeText(
+                    this,
+                    "Already trying to search for romu...",
+                    Toast.LENGTH_LONG
+                    ).show();
 
         return true;
     }
@@ -474,5 +490,30 @@ public class BluetoothLEService extends Service implements LeScanCallback
             broadcastUpdate(DEVICE_FOUND);
             bluetoothAdapter.stopLeScan(this);
         }
+    }
+
+    // Private methods 
+    // ==============================================================================
+    private void stopTryingWhenCannotConnectLong()
+    {
+        new Handler().postDelayed(new Runnable()
+                {
+                    @Override
+                    public void run()
+                        {
+                            Log.i(LOG_TAG, "Stopping connecing if not connected...");
+                            // TODO: the check always returns yes, may be a bug
+                            // of the phone.
+                            if(bluetoothManager.getConnectionState(device, BluetoothProfile.GATT_SERVER) 
+                                != BluetoothProfile.STATE_CONNECTED)
+                            {
+                                Log.i(LOG_TAG, "Cannot find device. Do not try connecting.");
+                                bluetoothGatt.disconnect();
+                                broadcastUpdate(ACTION_GATT_WRONG);
+                                connectionState = STATE_DISCONNECTED;
+                            }
+                        }
+                }
+            , 3000);
     }
 }
