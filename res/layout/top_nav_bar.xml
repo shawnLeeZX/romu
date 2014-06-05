@@ -2,90 +2,100 @@
 
 <LinearLayout xmlns:android = "http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".SearchFrag"
     android:layout_width    = "match_parent"
     android:layout_height   = "@dimen/top_layout_height"
     android:orientation      = "vertical"
     >
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width    = "match_parent"
-        android:layout_height   = "wrap_content"
+        android:layout_height   = "80dp"
         android:orientation      = "horizontal"
         android:background      = "@color/black"
         >
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+            >                
 
-            <ImageButton
-                android:id = "@+id/connection_indicator"
-                android:layout_width    = "@dimen/top_imagebutton"
-                android:layout_height   = "@dimen/top_imagebutton"
-                android:layout_marginRight      = "15dp"
-                android:layout_alignParentRight = "true"
-                android:layout_centerVertical = "true"
-                android:src      = "@drawable/disconnected"
-                android:scaleType="fitXY"
-                android:background="#000000"
-                android:onClick         = "onConnect"
-            />
-
-            <ImageView
-                android:id="@+id/vertical_colorbar"
-                android:layout_width="3dp"
-                android:layout_height="55dp"
-                android:layout_marginRight="15dp"
-                android:layout_toLeftOf="@id/connection_indicator"
-                android:background="@color/blue"
-                android:orientation="vertical" >
-            </ImageView>
-
-            <ImageButton
-                android:id = "@+id/check_bt"
-                android:layout_width = "@dimen/top_textview"
-                android:layout_height = "@dimen/top_textview"
-                android:layout_toLeftOf="@id/vertical_colorbar"
-                android:layout_marginRight="20dp"
-                android:layout_centerVertical="true"
-                android:src="@drawable/check"
-                android:scaleType="centerInside"
-                android:background = "@drawable/top_button_shape"
-                android:onClick = "onRoute"
+                <ImageButton
+                    android:id = "@+id/check_bt"
+                    android:layout_width = "@dimen/top_textview"
+                    android:layout_height = "@dimen/top_textview"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="20dp"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/check"
+                    android:scaleType="centerInside"
+                    android:background = "@drawable/top_button_shape"
+                    android:onClick = "onRoute"
                 />
-            <ImageView
+                <ImageView
                 android:id="@+id/vertical_colorbar_intext"
                 android:layout_width="5dp"
                 android:layout_height="@dimen/top_textview"
                 android:layout_toLeftOf="@id/check_bt"
                 android:layout_centerVertical="true"
                 android:background="@color/blue"
-            />
-            <!-- Pls note that in the above 'AutoCompleteTextView' I use drawableLeft to show the pic. But question is that pic is too near to left border. So I need to add a little blank area for beauty.-->
+                />
+                <!-- Pls note that in the above 'AutoCompleteTextView' I use drawableLeft to show the pic. But question is that pic is too near to left border. So I need to add a little blank area for beauty.-->
+                <ImageView
+                    android:id="@+id/search_leftimg"
+                    android:layout_width="@dimen/top_textview"
+                    android:layout_height="@dimen/top_textview"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginLeft="15dp"
+                    android:src="@drawable/search_button"
+                    android:scaleType="center"
+                    android:background="@drawable/top_leftblank_shape"
+                />
+                <AutoCompleteTextView
+                    android:id="@+id/main_dest_addr"
+                    android:layout_width="wrap_content"
+                    android:layout_height="@dimen/top_textview"
+                    android:layout_centerVertical="true"
+                    android:layout_toLeftOf="@id/vertical_colorbar_intext"
+                    android:layout_toRightOf="@id/search_leftimg"
+                    android:hint="@string/dest_addr"
+                    android:background="#e2e2e2"
+                    android:textColor="#000000"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"
+                />           
+            </RelativeLayout>
+            
             <ImageView
-                android:id="@+id/search_leftimg"
-                android:layout_width="@dimen/top_textview"
-                android:layout_height="@dimen/top_textview"
-                android:layout_centerVertical="true"
-                android:layout_alignParentLeft="true"
-                android:layout_marginLeft="15dp"
-                android:src="@drawable/search_button"
-                android:scaleType="center"
-                android:background="@drawable/top_leftblank_shape"
-            /> 
+                android:id="@+id/vertical_colorbar"
+                android:layout_width="3dp"
+                android:layout_height="80dp"
+                android:background="@color/blue"
+                android:orientation="vertical" >
+            </ImageView>
 
-            <AutoCompleteTextView
-                android:id              = "@+id/main_dest_addr"
-                android:layout_width    = "wrap_content"
-                android:layout_height   = "@dimen/top_textview"
-                android:layout_toLeftOf = "@id/vertical_colorbar_intext"
-                android:layout_toRightOf= "@id/search_leftimg" 
-                android:layout_centerVertical = "true"
-                android:singleLine      = "true"
-                android:completionThreshold     = "5"
-                android:hint            = "@string/dest_addr"
-                android:background      = "#e2e2e2"
-                android:textColor       = "#000000"
-            />
+            <RelativeLayout
+                android:layout_width = "match_parent"
+                android:layout_height = "match_parent"
+                android:layout_weight = "4"
+            >
+                <ImageButton
+                    android:id = "@+id/connection_indicator"
+                    android:layout_width    = "@dimen/top_imagebutton"
+                    android:layout_height   = "@dimen/top_imagebutton"
+                    android:layout_centerInParent="true"
+                    android:src      = "@drawable/connected"
+                    android:scaleType="fitXY"
+                    android:background="#000000"
+                    android:onClick = "onConnect"
+                />
+            </RelativeLayout>
 
+
+            
                
-    </RelativeLayout>
+    </LinearLayout>
 
     <ImageView
     android:layout_width = "match_parent"
