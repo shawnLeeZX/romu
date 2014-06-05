@@ -392,7 +392,7 @@ public class BluetoothLEService extends Service implements LeScanCallback
             Toast.makeText(
                     this,
                     "Scanning and searching romu...",
-                    Toast.LENGTH_LONG
+                    Toast.LENGTH_SHORT
                     ).show();
             return connect(macAddress);
         }
@@ -400,7 +400,7 @@ public class BluetoothLEService extends Service implements LeScanCallback
             Toast.makeText(
                     this,
                     "Already trying to search for romu...",
-                    Toast.LENGTH_LONG
+                    Toast.LENGTH_SHORT
                     ).show();
 
         return true;

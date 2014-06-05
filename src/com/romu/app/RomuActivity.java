@@ -482,7 +482,7 @@ public class RomuActivity extends Activity
                 else if(RomuService.ROMU_CONNECTED.equals(action))
                 {
                     // Notify user that bluetooth device has disconnected.
-                    Toast.makeText(RomuActivity.this, "Romu Connected", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RomuActivity.this, "Romu Connected", Toast.LENGTH_LONG).show();
                     romuConnected = true;
                     updateConnectionIndicator();
                     if(findViewById(R.id.state_button) != null)
@@ -493,7 +493,7 @@ public class RomuActivity extends Activity
                 else if(RomuService.ROMU_DISCONNECTED.equals(action))
                 {
                     // Notify user that bluetooth device has disconnected.
-                    Toast.makeText(RomuActivity.this, "Romu Disconnected", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(RomuActivity.this, "Romu Disconnected", Toast.LENGTH_LONG).show();
                     romuConnected = false;
                     updateConnectionIndicator();
                     if(!isNavigationStopped)
