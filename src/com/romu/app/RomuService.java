@@ -91,6 +91,8 @@ public class RomuService extends Service implements
     //Bluetooth Anti choke timer
     private static long TIME_AT_LAST_WRITE = 0;
     private static long DELAY_TIME = 500;
+
+   
     
     // Romu service related.
     private static final int FOREGROUND_ID = 1337;
@@ -485,13 +487,15 @@ public class RomuService extends Service implements
         Log.i(LOG_TAG, "Navigation started.");
         listenToNavigationUpdates = true;
         
-        startTime = System.currentTimeMillis();
-        finalDestination = makeLocation(currentRoute.getEndLocation());
-        currentLocation = locationClient.getLastLocation();
-        waypoints = currentRoute.getPoints();
-        writeUpdate(BEGIN_NAV_COMMAND, BEGIN_NAV_COMMAND);
-        currentDestination = makeLocation(currentRoute.getCurrentDestination());
-        listenTimeInterval = 300;
+        if(currentRoute!=null){
+         startTime = System.currentTimeMillis();
+         finalDestination = makeLocation(currentRoute.getEndLocation());
+         currentLocation = locationClient.getLastLocation();
+         waypoints = currentRoute.getPoints();
+         writeUpdate(BEGIN_NAV_COMMAND, BEGIN_NAV_COMMAND);
+         currentDestination = makeLocation(currentRoute.getCurrentDestination());
+         listenTimeInterval = 300;
+        }
     }
 
 
@@ -552,10 +556,8 @@ public class RomuService extends Service implements
                     }
                     else if(action == BluetoothLEService.ACTION_DATA_AVAILABLE)
                     {
-                        if(listenToNavigationUpdates)
-                            stopNavigation();
-                        else
-                            startNavigation();
+                        if(listenToNavigationUpdates && currentRoute!=null) stopNavigation();
+                        else if(currentRoute!=null)startNavigation();
                         broadcastUpdate(ROMU_NAVIGATION_STATE_CHANGE);
                     }
                 }
