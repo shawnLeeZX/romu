@@ -77,7 +77,8 @@ public class RomuService extends Service implements
     private int thresholdForLost =50;
     private static final long locationUpdateInterval = 5000;
     private static int currentDestinationRadius = 50;
-
+    
+    
     //Navigation commands
     public static final String PAUSE_NAV_COMMAND = "#6#1#";
     public static final String BEGIN_NAV_COMMAND = "#5#1#";
@@ -87,7 +88,10 @@ public class RomuService extends Service implements
     public static final String ARRIVED_CURRENT = "ARRIVED AT CURRENT WAYPOINT";
     public static final String ARRIVED_FINAL = "ARRIVED AT DESTINATION";
 
-
+    //Bluetooth Anti choke timer
+    private static long TIME_AT_LAST_WRITE = 0;
+    private static long DELAY_TIME = 500;
+    
     // Romu service related.
     private static final int FOREGROUND_ID = 1337;
     private final IBinder binder = new LocalBinder();
@@ -218,10 +222,16 @@ public class RomuService extends Service implements
                     startTime = currentTime;
                     enoughTimeHasPassed = true;
             }
-            if(enoughTimeHasPassed || action.equals(ARRIVED_FINAL) || action.equals(ARRIVED_CURRENT)){
+            if(enoughTimeHasPassed || action.equals(ARRIVED_FINAL) || action.equals(PAUSE_NAV_COMMAND)||
+            		action.equals(ARRIVED_CURRENT)||action.equals(BEGIN_NAV_COMMAND)){
                 enoughTimeHasPassed=false;
                 listenTimeInterval = updateFrequencyDefault;
-                sendCommand(command);
+                if((currentTime - TIME_AT_LAST_WRITE) >= DELAY_TIME){
+                	sendCommand(command);
+                	TIME_AT_LAST_WRITE = System.currentTimeMillis();
+                }
+                
+                
             }
         }
         
@@ -479,7 +489,7 @@ public class RomuService extends Service implements
         finalDestination = makeLocation(currentRoute.getEndLocation());
         currentLocation = locationClient.getLastLocation();
         waypoints = currentRoute.getPoints();
-        sendCommand(BEGIN_NAV_COMMAND);
+        writeUpdate(BEGIN_NAV_COMMAND, BEGIN_NAV_COMMAND);
         currentDestination = makeLocation(currentRoute.getCurrentDestination());
         listenTimeInterval = 300;
     }
@@ -578,7 +588,7 @@ public class RomuService extends Service implements
         Log.i(LOG_TAG, "Navigation stopped.");
         listenToNavigationUpdates = false;
 
-        sendCommand(PAUSE_NAV_COMMAND);
+        writeUpdate(PAUSE_NAV_COMMAND, PAUSE_NAV_COMMAND);
 
     }
 

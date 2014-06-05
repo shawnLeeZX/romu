@@ -428,6 +428,7 @@ public class BluetoothLEService extends Service implements LeScanCallback
         {
             final byte[] rx = characteristic.getValue();
             intent.putExtra(EXTRA_DATA, rx);
+            Log.d("Bluetooth print::::::", new String(rx));
         }
         broadcastManager.sendBroadcast(intent);
     }
