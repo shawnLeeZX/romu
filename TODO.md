@@ -1,6 +1,6 @@
-* Redraw map when activity being destroyed.
-* Auto scrolling when input more than one line text in dest textfield.
-* Auto wrap when address is beyond one line.
-* Finish communication with wearable with Andrew.
 * Update navigation information on info pane
-* Improve UI code.
+* Fix the play button of bottom control bar is not changing when setting route
+  again.
+* Handle crash when inputting wrong address.
+* Elegate quit when internet request is wrong when using Google Place API or
+  Directional API.
