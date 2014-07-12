@@ -1,44 +1,3 @@
-/**
- * Romu introduction:
- * ==========================
- *
- * The workflow of this app works like the following:
- * Initialization:
- *  The user is given a list to choose the correponding wearable deivce
- *  according to mac address. After initialization, the app automatically
- *  connect to the device chosen at start up.
- *
- * Normal workflow(after initialization):
- * At startup:
- *  if bluetooth is not enabled, it prompts user to enable bluetooth. If the
- *  user does not permit the action, permission of bluetooth will be asked each
- *  time it is needed.(This part could be changed since I am not responsible for
- *  the bluetooth part and the function to communicate with arduino is not implemented yet.)
- *
- *  Then the main interface is loaded, which is a map that gives the user a
- *  visual display on map of where she or he is.
- *
- *  In this interface, user can decide to start navigation by clicking
- *  'navigation' button.
- *
- * When user decide to do navigation:
- *  After the 'navigation' is clicked, the user is prompted to input a start
- *  location and a destination. Autocompletion will happen in this phase to give
- *  right address decription to user as typing. User confirms the input by
- *  clicking the button 'ok' 
- *
- * Upon confirmation:
- *  After getting two address, utilizing Google Direction API service, all
- *  information needed to travel from origin to destination is fetched and
- *  stored in the {@link Route} class. At the same time, route will be displayed
- *  on the map.
- *  @Andrew, this is where you should take over. Route class have all the
- *  information needed.
- *  For now, location service is buggy. More specifically, the availability of
- *  Google Play Service is not solid. When I disable location service, the app
- *  crashes. And bluetooth is not functioning at all. You can remove any code
- *  concerning bluetooth.
- */
 package com.romu.app;
 
 import java.net.MalformedURLException;
@@ -82,6 +41,11 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+/**
+ * RomuActivity is responsible for User Interface to interact with user. It has
+ * a inner class {@link GetRoutes} to request route from Google Direction
+ * Service. 
+ */
 public class RomuActivity extends Activity
     implements TopNavBarFragment.TopNavBarAttachedListener,
                BottomCtrlBarFragment.BottomCtrlBarAttachedListener
@@ -140,6 +104,7 @@ public class RomuActivity extends Activity
     /**
      * Called when the activity is first created. 
      */
+
     @Override
     public void onCreate(Bundle savedInstanceState)
     {
